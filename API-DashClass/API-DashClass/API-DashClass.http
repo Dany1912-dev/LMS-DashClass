@@ -1,4 +1,4 @@
-@API_DashClass_HostAddress = http://localhost:5233
+@API_DashClass_HostAddress = http://localhost:5075
 
 GET {{API_DashClass_HostAddress}}/weatherforecast/
 Accept: application/json
