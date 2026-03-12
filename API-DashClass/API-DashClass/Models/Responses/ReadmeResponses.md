@@ -1,0 +1,1 @@
+Aqui estaran mapeadas las clases de la manera en que respondera la API a una solicitud CRUD
