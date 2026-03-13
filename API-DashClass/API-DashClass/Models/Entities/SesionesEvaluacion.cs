@@ -23,7 +23,7 @@ namespace API_DashClass.Models.Entities
         public string CodigoSesion { get; set; }
 
         [Column("fecha_inicio")]
-        public DateTime FechaInicio { get; set; } = DateTime.Now;
+        public DateTime FechaInicio { get; set; }
 
         [Column("fecha_fin")]
         public DateTime? FechaFin { get; set; }

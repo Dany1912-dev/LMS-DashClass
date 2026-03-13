@@ -41,6 +41,6 @@ namespace API_DashClass.Models.Entities
         public string CodigoTransferencia { get; set; }
 
         [Column("fecha_transferencia")]
-        public DateTime FechaTransferencia { get; set; } = DateTime.Now;
+        public DateTime FechaTransferencia { get; set; }
     }
 }
