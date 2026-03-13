@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using System.Net.NetworkInformation;
 
 namespace API_DashClass.Models.Entities
 {
@@ -29,6 +28,17 @@ namespace API_DashClass.Models.Entities
         public DateTime? FechaFin { get; set; }
 
         [Column("estatus")]
-        public bool Estatus { get; set; } = true;
+        public bool Estatus { get; set; }
+
+        // ========================================
+        // NAVIGATION PROPERTIES
+        // ========================================
+
+        // Evaluación a la que pertenece esta sesión (FK)
+        [ForeignKey("IdEvaluacion")]
+        public Evaluaciones? Evaluacion { get; set; }
+
+        // Respuestas de estudiantes en esta sesión
+        public ICollection<RespuestasEstudiantes>? RespuestasEstudiantes { get; set; }
     }
 }

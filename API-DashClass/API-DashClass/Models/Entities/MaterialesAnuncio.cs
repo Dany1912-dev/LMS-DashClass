@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
@@ -44,5 +43,13 @@ namespace API_DashClass.Models.Entities
 
         [Column("fecha_subida")]
         public DateTime FechaSubida { get; set; }
+
+        // ========================================
+        // NAVIGATION PROPERTIES
+        // ========================================
+
+        // Anuncio al que pertenece este material (FK)
+        [ForeignKey("IdAnuncio")]
+        public Anuncios? Anuncio { get; set; }
     }
 }

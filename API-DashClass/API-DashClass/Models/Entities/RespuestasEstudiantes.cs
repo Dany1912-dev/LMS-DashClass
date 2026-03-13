@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
@@ -9,7 +8,7 @@ namespace API_DashClass.Models.Entities
     public class RespuestasEstudiantes
     {
         [Key]
-        [Column ("id_respuesta")]
+        [Column("id_respuesta")]
         public int IdRespuesta { get; set; }
 
         [Column("id_sesion_evaluacion")]
@@ -22,21 +21,37 @@ namespace API_DashClass.Models.Entities
 
         [Column("id_pregunta")]
         [Required]
-        public int IdPuntuacion { get; set; }
+        public int IdPregunta { get; set; }
 
-        [Column ("respuesta_dada")]
+        [Column("respuesta_dada")]
         public string? RespuestaDada { get; set; }
-         
-        [Column ("es_correcta")]
-        public bool EsCorrecta { get; set; } = true;
 
-        [Column ("tiempo_tomado")]
+        [Column("es_correcta")]
+        public bool? EsCorrecta { get; set; }
+
+        [Column("tiempo_tomado")]
         public int? TiempoTomado { get; set; }
 
-        [Column ("puntuacion_obtenida")]
+        [Column("puntuacion_obtenida")]
         public int? PuntuacionObtenida { get; set; }
 
-        [Column ("fecha_respuesta")]
+        [Column("fecha_respuesta")]
         public DateTime FechaRespuesta { get; set; }
+
+        // ========================================
+        // NAVIGATION PROPERTIES
+        // ========================================
+
+        // Sesión de evaluación en la que se dio esta respuesta (FK)
+        [ForeignKey("IdSesionEvaluacion")]
+        public SesionesEvaluacion? SesionEvaluacion { get; set; }
+
+        // Usuario (estudiante) que dio la respuesta (FK)
+        [ForeignKey("IdUsuario")]
+        public Usuario? Estudiante { get; set; }
+
+        // Pregunta que se respondió (FK)
+        [ForeignKey("IdPregunta")]
+        public PreguntasEvaluacion? Pregunta { get; set; }
     }
 }

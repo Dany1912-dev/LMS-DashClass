@@ -1,4 +1,6 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using System;
+using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace API_DashClass.Models.Entities
@@ -35,6 +37,48 @@ namespace API_DashClass.Models.Entities
         public DateTime FechaCreacion { get; set; }
 
         [Column("estatus")]
-        public bool Estatus { get; set; } = true;
+        public bool Estatus { get; set; }
+
+
+        // ========================================
+        // NAVIGATION PROPERTIES
+        // ========================================
+
+        // Profesor que creó el curso (FK)
+        [ForeignKey("IdUsuario")]
+        public Usuario? CreadoPor { get; set; }
+
+        // Grupos dentro de este curso
+        public ICollection<Grupos>? Grupos { get; set; }
+
+        // Miembros inscritos en este curso
+        public ICollection<MiembrosCursos>? Miembros { get; set; }
+
+        // Invitaciones para este curso
+        public ICollection<InvitacionesCurso>? Invitaciones { get; set; }
+
+        // Actividades de este curso
+        public ICollection<Actividades>? Actividades { get; set; }
+
+        // Anuncios de este curso
+        public ICollection<Anuncios>? Anuncios { get; set; }
+
+        // Sesiones de asistencia de este curso
+        public ICollection<SesionesAsistencia>? SesionesAsistencia { get; set; }
+
+        // Transacciones de puntos en este curso
+        public ICollection<TransaccionesPuntos>? TransaccionesPuntos { get; set; }
+
+        // Recompensas disponibles en este curso
+        public ICollection<Recompensas>? Recompensas { get; set; }
+
+        // Evaluaciones de este curso
+        public ICollection<Evaluaciones>? Evaluaciones { get; set; }
+
+        // Logros disponibles en este curso
+        public ICollection<Logros>? Logros { get; set; }
+
+        // Transferencias de puntos en este curso
+        public ICollection<TransferenciasPuntos>? TransferenciasPuntos { get; set; }
     }
 }

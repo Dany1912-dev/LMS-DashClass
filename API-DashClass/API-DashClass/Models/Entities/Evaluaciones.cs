@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace API_DashClass.Models.Entities
 {
@@ -14,7 +13,8 @@ namespace API_DashClass.Models.Entities
             Kahoot,
             Formulario
         }
-         public enum EstadoEvaluacion
+
+        public enum EstadoEvaluacion
         {
             Borrador,
             Listo,
@@ -46,7 +46,7 @@ namespace API_DashClass.Models.Entities
         public ModoEvaluacion Modo { get; set; }
 
         [Column("afecta_calificacion")]
-        public bool AfectaCalificacion { get; set; } = false;
+        public bool AfectaCalificacion { get; set; }
 
         [Column("puntos_academicos_maximos")]
         public int? PuntosAcademicosMaximos { get; set; }
@@ -61,13 +61,13 @@ namespace API_DashClass.Models.Entities
         public int? PenalidadTiempo { get; set; }
 
         [Column("mostrar_ranking_vivo")]
-        public bool MostrarRankingVivo { get; set; } = false;
+        public bool MostrarRankingVivo { get; set; }
 
         [Column("permitir_entrada_tardia")]
-        public bool PermitirEntradaTardia { get; set; } = false;
+        public bool PermitirEntradaTardia { get; set; }
 
         [Column("estado")]
-        public EstadoEvaluacion Estado { get; set; } = EstadoEvaluacion.Borrador;
+        public EstadoEvaluacion Estado { get; set; }
 
         [Column("id_usuario")]
         [Required]
@@ -75,5 +75,27 @@ namespace API_DashClass.Models.Entities
 
         [Column("fecha_creacion")]
         public DateTime FechaCreacion { get; set; }
+
+        // ========================================
+        // NAVIGATION PROPERTIES
+        // ========================================
+
+        // Curso al que pertenece esta evaluación (FK)
+        [ForeignKey("IdCurso")]
+        public Cursos? Curso { get; set; }
+
+        // Grupo al que está dirigida esta evaluación (opcional) (FK)
+        [ForeignKey("IdGrupo")]
+        public Grupos? Grupo { get; set; }
+
+        // Usuario (profesor) que creó esta evaluación (FK)
+        [ForeignKey("IdUsuario")]
+        public Usuario? CreadoPor { get; set; }
+
+        // Preguntas de esta evaluación
+        public ICollection<PreguntasEvaluacion>? Preguntas { get; set; }
+
+        // Sesiones activas de esta evaluación (para modo Kahoot)
+        public ICollection<SesionesEvaluacion>? Sesiones { get; set; }
     }
 }

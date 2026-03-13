@@ -1,8 +1,7 @@
-﻿using Microsoft.AspNetCore.Http.HttpResults;
-using Microsoft.EntityFrameworkCore.Metadata.Internal;
+﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace API_DashClass.Models.Entities
 {
@@ -20,16 +19,41 @@ namespace API_DashClass.Models.Entities
         [Column("nombre")]
         [Required]
         [MaxLength(100)]
-        public string nombre { get; set; }
+        public string Nombre { get; set; }
 
         [Column("descripcion")]
-        public string? descripcion { get; set; }
+        public string? Descripcion { get; set; }
 
         [Column("fecha_creacion")]
-        [Required]
-        public DateTime fechaCreacion { get; set; }
+        public DateTime FechaCreacion { get; set; }
 
         [Column("estatus")]
-        public bool Estatus { get; set; } = true;
+        public bool Estatus { get; set; }
+
+        // ========================================
+        // NAVIGATION PROPERTIES
+        // ========================================
+
+        // Curso al que pertenece este grupo (FK)
+        [ForeignKey("IdCurso")]
+        public Cursos? Curso { get; set; }
+
+        // Miembros de este grupo
+        public ICollection<MiembrosCursos>? Miembros { get; set; }
+
+        // Invitaciones para este grupo
+        public ICollection<InvitacionesCurso>? Invitaciones { get; set; }
+
+        // Actividades asignadas a este grupo
+        public ICollection<ActividadesGrupos>? ActividadesGrupos { get; set; }
+
+        // Anuncios dirigidos a este grupo
+        public ICollection<Anuncios>? Anuncios { get; set; }
+
+        // Sesiones de asistencia para este grupo
+        public ICollection<SesionesAsistencia>? SesionesAsistencia { get; set; }
+
+        // Evaluaciones para este grupo
+        public ICollection<Evaluaciones>? Evaluaciones { get; set; }
     }
 }

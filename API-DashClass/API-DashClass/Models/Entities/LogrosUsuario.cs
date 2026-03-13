@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
@@ -23,5 +22,16 @@ namespace API_DashClass.Models.Entities
         [Column("fecha_desbloqueo")]
         public DateTime FechaDesbloqueo { get; set; }
 
+        // ========================================
+        // NAVIGATION PROPERTIES
+        // ========================================
+
+        // Logro desbloqueado (FK)
+        [ForeignKey("IdLogro")]
+        public Logros? Logro { get; set; }
+
+        // Usuario (estudiante) que desbloqueó el logro (FK)
+        [ForeignKey("IdUsuario")]
+        public Usuario? Estudiante { get; set; }
     }
 }

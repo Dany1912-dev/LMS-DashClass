@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
@@ -20,7 +19,6 @@ namespace API_DashClass.Models.Entities
         [Required]
         public decimal Puntuacion { get; set; }
 
-
         [Column("retroalimentacion")]
         public string? Retroalimentacion { get; set; }
 
@@ -32,6 +30,18 @@ namespace API_DashClass.Models.Entities
         public int IdUsuario { get; set; }
 
         [Column("fecha_calificacion")]
-        public DateTime FechaCalificacion  { get; set; }
+        public DateTime FechaCalificacion { get; set; }
+
+        // ========================================
+        // NAVIGATION PROPERTIES
+        // ========================================
+
+        // Entrega que fue calificada (1:1) (FK)
+        [ForeignKey("IdEntrega")]
+        public Entregas? Entrega { get; set; }
+
+        // Usuario (profesor) que calificó (FK)
+        [ForeignKey("IdUsuario")]
+        public Usuario? CalificadoPor { get; set; }
     }
 }

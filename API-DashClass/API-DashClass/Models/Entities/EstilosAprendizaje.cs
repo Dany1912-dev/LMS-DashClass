@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
@@ -53,5 +52,13 @@ namespace API_DashClass.Models.Entities
 
         [Column("respuestas_cuestionario")]
         public string? RespuestasCuestionario { get; set; }
+
+        // ========================================
+        // NAVIGATION PROPERTIES
+        // ========================================
+
+        // Usuario al que pertenece este estilo de aprendizaje (1:1) (FK)
+        [ForeignKey("IdUsuario")]
+        public Usuario? Usuario { get; set; }
     }
 }

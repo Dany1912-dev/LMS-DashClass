@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace API_DashClass.Models.Entities
 {
@@ -23,17 +22,17 @@ namespace API_DashClass.Models.Entities
         public string Nombre { get; set; }
 
         [Column("descripcion")]
-        public string Descripcion { get; set; }
+        public string? Descripcion { get; set; }
 
         [Column("url_icono")]
         [MaxLength(500)]
-        public string UrlIcono { get; set; }
+        public string? UrlIcono { get; set; }
 
         [Column("criterios")]
-        public string Criterios { get; set; }
+        public string? Criterios { get; set; }
 
         [Column("estatus")]
-        public bool Estatus { get; set; } = true;
+        public bool Estatus { get; set; }
 
         [Column("id_usuario")]
         [Required]
@@ -41,5 +40,20 @@ namespace API_DashClass.Models.Entities
 
         [Column("fecha_creacion")]
         public DateTime FechaCreacion { get; set; }
+
+        // ========================================
+        // NAVIGATION PROPERTIES
+        // ========================================
+
+        // Curso al que pertenece este logro (FK)
+        [ForeignKey("IdCurso")]
+        public Cursos? Curso { get; set; }
+
+        // Usuario (profesor) que creó este logro (FK)
+        [ForeignKey("IdUsuario")]
+        public Usuario? CreadoPor { get; set; }
+
+        // Desbloqueos de este logro por estudiantes
+        public ICollection<LogrosUsuario>? LogrosUsuario { get; set; }
     }
 }

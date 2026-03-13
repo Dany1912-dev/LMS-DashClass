@@ -1,3 +1,5 @@
+using System;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
@@ -33,8 +35,7 @@ namespace API_DashClass.Models.Entities
         public string CodigoVerificacion { get; set; }
 
         [Column("intervalo_qr")]
-        [Required]
-        public int IntervaloQr { get; set; } = 20;
+        public int IntervaloQr { get; set; }
 
         [Column("fecha_creacion")]
         public DateTime FechaCreacion { get; set; }
@@ -48,6 +49,25 @@ namespace API_DashClass.Models.Entities
         public int IdUsuario { get; set; }
 
         [Column("estatus")]
-        public bool Estatus { get; set; } = true;
+        public bool Estatus { get; set; }
+
+        // ========================================
+        // NAVIGATION PROPERTIES
+        // ========================================
+
+        // Curso al que pertenece esta sesión de asistencia (FK)
+        [ForeignKey("IdCurso")]
+        public Cursos? Curso { get; set; }
+
+        // Grupo al que está dirigida esta sesión (opcional) (FK)
+        [ForeignKey("IdGrupo")]
+        public Grupos? Grupo { get; set; }
+
+        // Usuario (profesor) que creó esta sesión (FK)
+        [ForeignKey("IdUsuario")]
+        public Usuario? CreadoPor { get; set; }
+
+        // Registros de asistencia de estudiantes en esta sesión
+        public ICollection<RegistrosAsistencia>? RegistrosAsistencia { get; set; }
     }
 }

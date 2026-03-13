@@ -97,7 +97,7 @@ CREATE TABLE invitaciones_curso (
     id_invitacion INT PRIMARY KEY AUTO_INCREMENT,
     id_curso INT NOT NULL,
     id_grupo INT,
-    tipo ENUM('Codigo', 'Enlace', 'Email') NOT NULL,
+    tipo ENUM('Codigo', 'Enlace') NOT NULL,
     codigo VARCHAR(6),
     token VARCHAR(255),
     fecha_expiracion DATETIME,
@@ -120,15 +120,16 @@ CREATE TABLE actividades (
     puntos_gamificacion_maximos INT DEFAULT 0,
     fecha_limite DATETIME,
     permite_entregas_tardias BOOLEAN DEFAULT FALSE,
-    estatus ENUM('Borrador', 'Publicado', 'Programado') DEFAULT 'Borrador',
+    estatus ENUM('Borrador', 'Publicado', 'Programado', 'Archivado') DEFAULT 'Borrador',
     fecha_publicacion DATETIME,
+    fecha_programada DATETIME,
     id_usuario INT NOT NULL,
     fecha_creacion DATETIME DEFAULT CURRENT_TIMESTAMP,
     
     FOREIGN KEY (id_curso) REFERENCES cursos(id_curso),
     FOREIGN KEY (id_usuario) REFERENCES usuarios(id_usuario),
     INDEX index_curso (id_curso),
-    INDEX index_estado (estado),
+    INDEX index_estatus (estatus),
     INDEX index_usuario (id_usuario)
 )ENGINE=InnoDB;
 
@@ -138,7 +139,7 @@ CREATE TABLE anuncios (
     id_grupo INT,
     titulo VARCHAR(255) NOT NULL,
     contenido TEXT NOT NULL,
-    destacado BOOLEAN DEFAULT FALSE,
+    es_importante BOOLEAN DEFAULT FALSE,
     estatus BOOLEAN DEFAULT TRUE,
     id_usuario INT NOT NULL,
     fecha_publicacion DATETIME DEFAULT CURRENT_TIMESTAMP,
@@ -149,7 +150,7 @@ CREATE TABLE anuncios (
     FOREIGN KEY (id_usuario) REFERENCES usuarios(id_usuario),
     INDEX index_curso (id_curso),
     INDEX index_grupo (id_grupo),
-    INDEX index_destacado (destacado)
+    INDEX index_importante (es_importante)
 )ENGINE=InnoDB;
 
 CREATE TABLE sesiones_asistencia (
@@ -198,7 +199,6 @@ CREATE TABLE recompensas (
     id_curso INT NOT NULL,
     nombre VARCHAR(255) NOT NULL,
     descripcion TEXT,
-    url_imagen VARCHAR(500),
     costo INT NOT NULL,
     limite_por_usuario INT,
     stock_global INT,
@@ -226,8 +226,8 @@ CREATE TABLE evaluaciones (
     afecta_calificacion BOOLEAN DEFAULT FALSE,
     puntos_academicos_maximos INT,
     puntos_gamificacion INT DEFAULT 0,
-    puntuacion_base INT DEFAULT 1000,
-    penalidad_tiempo INT DEFAULT 10,
+    puntuacion_base INT,
+    penalidad_tiempo INT,
     mostrar_ranking_vivo BOOLEAN DEFAULT FALSE,
     permitir_entrada_tardia BOOLEAN DEFAULT FALSE,
     estado ENUM('Borrador', 'Listo', 'Activo', 'Completado') DEFAULT 'Borrador',
@@ -248,7 +248,7 @@ CREATE TABLE logros (
     nombre VARCHAR(255) NOT NULL,
     descripcion TEXT,
     url_icono VARCHAR(500),
-    criterios JSON,
+    criterios JSON NOT NULL,
     estatus BOOLEAN DEFAULT TRUE,
     id_usuario INT NOT NULL,
     fecha_creacion DATETIME DEFAULT CURRENT_TIMESTAMP,
@@ -361,7 +361,7 @@ CREATE TABLE registros_asistencia (
     id_registro_asistencia INT PRIMARY KEY AUTO_INCREMENT,
     id_sesion_asistencia INT NOT NULL,
     id_usuario INT NOT NULL,
-    metodo_usado ENUM('QR', 'Codigo', 'Geolocalizacion') NOT NULL,
+    metodo_usado ENUM('QR', 'CodigoManual') NOT NULL,
     fecha_registro DATETIME DEFAULT CURRENT_TIMESTAMP,
     
     FOREIGN KEY (id_sesion_asistencia) REFERENCES sesiones_asistencia(id_sesion),

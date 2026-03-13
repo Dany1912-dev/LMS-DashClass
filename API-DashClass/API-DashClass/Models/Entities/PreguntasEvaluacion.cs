@@ -2,8 +2,6 @@
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using static System.Net.Mime.MediaTypeNames;
-using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace API_DashClass.Models.Entities
 {
@@ -16,6 +14,7 @@ namespace API_DashClass.Models.Entities
             VerdaderoFalso,
             RespuestaCorta
         }
+
         [Key]
         [Column("id_pregunta")]
         public int IdPregunta { get; set; }
@@ -50,6 +49,17 @@ namespace API_DashClass.Models.Entities
         public int Orden { get; set; }
 
         [Column("en_banco_preguntas")]
-        public bool EnBancoPreguntas { get; set; } = false;
+        public bool EnBancoPreguntas { get; set; }
+
+        // ========================================
+        // NAVIGATION PROPERTIES
+        // ========================================
+
+        // Evaluación a la que pertenece esta pregunta (FK)
+        [ForeignKey("IdEvaluacion")]
+        public Evaluaciones? Evaluacion { get; set; }
+
+        // Respuestas de estudiantes a esta pregunta
+        public ICollection<RespuestasEstudiantes>? RespuestasEstudiantes { get; set; }
     }
 }
