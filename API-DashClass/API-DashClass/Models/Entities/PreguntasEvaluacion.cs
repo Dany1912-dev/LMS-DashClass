@@ -7,17 +7,7 @@ using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace API_DashClass.Models.Entities
 {
-    [Table("preguntas_evalucion")]
-    id_pregunta INT PRIMARY KEY AUTO_INCREMENT,
-    id_evaluacion INT NOT NULL,
-    texto_pregunta TEXT NOT NULL,
-    url_imagen VARCHAR(500),
-    tipo ENUM('OpcionMultiple', 'VerdaderoFalso', 'RespuestaCorta') NOT NULL,
-    opciones JSON,
-    respuestas_correctas JSON,
-    tiempo_limite INT,
-    orden INT NOT NULL,
-    en_banco_preguntas BOOLEAN DEFAULT FALSE,
+    [Table("preguntas_evaluacion")]
     public class PreguntasEvaluacion
     {
         public enum TipoPregunta
