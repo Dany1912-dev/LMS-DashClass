@@ -1,3 +1,5 @@
+using System;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
@@ -22,13 +24,9 @@ namespace API_DashClass.Models.Entities
         [Column("descripcion")]
         public string? Descripcion { get; set; }
 
-        [Column("url_imagen")]
-        [Required]
-        public string? UrlImagen { get; set; }
-
         [Column("costo")]
         [Required]
-        public decimal Costo { get; set; }
+        public int Costo { get; set; }
 
         [Column("limite_por_usuario")]
         public int? LimitePorUsuario { get; set; }
@@ -59,5 +57,20 @@ namespace API_DashClass.Models.Entities
 
         [Column("fecha_creacion")]
         public DateTime FechaCreacion { get; set; }
+
+        // ========================================
+        // NAVIGATION PROPERTIES
+        // ========================================
+
+        // Curso al que pertenece esta recompensa (FK)
+        [ForeignKey("IdCurso")]
+        public Cursos? Curso { get; set; }
+
+        // Usuario (profesor) que creó esta recompensa (FK)
+        [ForeignKey("IdUsuario")]
+        public Usuario? CreadoPor { get; set; }
+
+        // Canjes realizados de esta recompensa
+        public ICollection<Canjes>? Canjes { get; set; }
     }
 }

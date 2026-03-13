@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
@@ -19,5 +18,17 @@ namespace API_DashClass.Models.Entities
         [Column("id_grupo")]
         [Required]
         public int IdGrupo { get; set; }
+
+        // ========================================
+        // NAVIGATION PROPERTIES
+        // ========================================
+
+        // Actividad asociada (FK)
+        [ForeignKey("IdActividad")]
+        public Actividades? Actividad { get; set; }
+
+        // Grupo asociado (FK)
+        [ForeignKey("IdGrupo")]
+        public Grupos? Grupo { get; set; }
     }
 }

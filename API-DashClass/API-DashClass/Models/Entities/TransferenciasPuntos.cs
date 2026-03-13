@@ -1,8 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace API_DashClass.Models.Entities
 {
@@ -19,7 +17,7 @@ namespace API_DashClass.Models.Entities
 
         [Column("hacia_id_usuario")]
         [Required]
-        public int DesdeDesde { get; set; }
+        public int HaciaIdUsuario { get; set; }
 
         [Column("id_curso")]
         [Required]
@@ -33,7 +31,7 @@ namespace API_DashClass.Models.Entities
         public string? Mensaje { get; set; }
 
         [Column("anonima")]
-        public bool Anonima { get; set; } = false;
+        public bool Anonima { get; set; }
 
         [Column("codigo_transferencia")]
         [Required]
@@ -42,5 +40,21 @@ namespace API_DashClass.Models.Entities
 
         [Column("fecha_transferencia")]
         public DateTime FechaTransferencia { get; set; }
+
+        // ========================================
+        // NAVIGATION PROPERTIES
+        // ========================================
+
+        // Usuario que envía los puntos (FK)
+        [ForeignKey("DesdeIdUsuario")]
+        public Usuario? UsuarioEmisor { get; set; }
+
+        // Usuario que recibe los puntos (FK)
+        [ForeignKey("HaciaIdUsuario")]
+        public Usuario? UsuarioReceptor { get; set; }
+
+        // Curso en el que ocurre la transferencia (FK)
+        [ForeignKey("IdCurso")]
+        public Cursos? Curso { get; set; }
     }
 }

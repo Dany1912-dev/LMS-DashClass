@@ -1,11 +1,10 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace API_DashClass.Models.Entities
 {
-    [Table ("canjes")]
+    [Table("canjes")]
     public class Canjes
     {
         public enum EstadoCanje
@@ -38,12 +37,24 @@ namespace API_DashClass.Models.Entities
 
         [Column("estado")]
         [Required]
-        public EstadoCanje Estado { get; set; } = EstadoCanje.Pendiente;
+        public EstadoCanje Estado { get; set; }
 
         [Column("fecha_canje")]
         public DateTime FechaCanje { get; set; }
 
         [Column("fecha_reclamado")]
         public DateTime? FechaReclamado { get; set; }
+
+        // ========================================
+        // NAVIGATION PROPERTIES
+        // ========================================
+
+        // Recompensa canjeada (FK)
+        [ForeignKey("IdRecompensa")]
+        public Recompensas? Recompensa { get; set; }
+
+        // Usuario (estudiante) que hizo el canje (FK)
+        [ForeignKey("IdUsuario")]
+        public Usuario? Estudiante { get; set; }
     }
 }

@@ -46,45 +46,70 @@ namespace API_DashClass.Models.Entities
         public DateTime? UltimoAcceso { get; set; }
 
         [Column("estatus")]
-        public bool Estatus { get; set; } = true;
+        public bool Estatus { get; set; }
 
-        //// Cursos creados por este usuario
-        //public ICollection<Curso>? CursosCreados { get; set; }
 
-        //// Métodos de autenticación del usuario
-        //public ICollection<MetodoAuthUsuario>? MetodosAuth { get; set; }
+        // ========================================
+        // NAVIGATION PROPERTIES
+        // ========================================
 
-        //// Inscripciones a cursos
-        //public ICollection<MiembroCurso>? MiembrosCurso { get; set; }
+        // Cursos creados por este usuario (como profesor)
+        public ICollection<Cursos>? CursosCreados { get; set; }
 
-        //// Transacciones de puntos
-        //public ICollection<TransaccionPuntos>? TransaccionesPuntos { get; set; }
+        // Métodos de autenticación del usuario
+        public ICollection<MetodosAuthUsers>? MetodosAuth { get; set; }
 
-        //// Canjes realizados
-        //public ICollection<Canje>? Canjes { get; set; }
+        // Inscripciones a cursos (como estudiante o profesor)
+        public ICollection<MiembrosCursos>? MiembrosCurso { get; set; }
 
-        //// Transferencias enviadas
-        //public ICollection<TransferenciaPuntos>? TransferenciasEnviadas { get; set; }
+        // Actividades creadas por este usuario (como profesor)
+        public ICollection<Actividades>? ActividadesCreadas { get; set; }
 
-        //// Transferencias recibidas
-        //public ICollection<TransferenciaPuntos>? TransferenciasRecibidas { get; set; }
+        // Anuncios publicados por este usuario (como profesor)
+        public ICollection<Anuncios>? AnunciosPublicados { get; set; }
 
-        //// Logros desbloqueados
-        //public ICollection<LogroUsuario>? LogrosUsuario { get; set; }
+        // Sesiones de asistencia creadas por este usuario (como profesor)
+        public ICollection<SesionesAsistencia>? SesionesAsistenciaCreadas { get; set; }
 
-        //// Estilo de aprendizaje
-        //public EstiloAprendizaje? EstiloAprendizaje { get; set; }
+        // Entregas realizadas por este usuario (como estudiante)
+        public ICollection<Entregas>? Entregas { get; set; }
 
-        //// Entregas realizadas
-        //public ICollection<Entrega>? Entregas { get; set; }
+        // Calificaciones dadas por este usuario (como profesor)
+        public ICollection<Calificaciones>? CalificacionesDadas { get; set; }
 
-        //// Registros de asistencia
-        //public ICollection<RegistroAsistencia>? RegistrosAsistencia { get; set; }
+        // Registros de asistencia de este usuario (como estudiante)
+        public ICollection<RegistrosAsistencia>? RegistrosAsistencia { get; set; }
 
-        //// Calificaciones dadas (como profesor)
-        //public ICollection<Calificacion>? CalificacionesDadas { get; set; }
+        // Transacciones de puntos de este usuario
+        public ICollection<TransaccionesPuntos>? TransaccionesPuntos { get; set; }
 
-        //// Respuestas en evaluaciones
-        //public ICollection<RespuestaEstudiante>? RespuestasEvaluaciones { get; set; }
+        // Recompensas creadas por este usuario (como profesor)
+        public ICollection<Recompensas>? RecompensasCreadas { get; set; }
+
+        // Canjes realizados por este usuario (como estudiante)
+        public ICollection<Canjes>? Canjes { get; set; }
+
+        // Evaluaciones creadas por este usuario (como profesor)
+        public ICollection<Evaluaciones>? EvaluacionesCreadas { get; set; }
+
+        // Respuestas dadas en evaluaciones (como estudiante)
+        public ICollection<RespuestasEstudiantes>? RespuestasEvaluaciones { get; set; }
+
+        // Logros creados por este usuario (como profesor)
+        public ICollection<Logros>? LogrosCreados { get; set; }
+
+        // Logros desbloqueados por este usuario (como estudiante)
+        public ICollection<LogrosUsuario>? LogrosDesbloqueados { get; set; }
+
+        // Transferencias de puntos enviadas por este usuario
+        [InverseProperty("UsuarioEmisor")]
+        public ICollection<TransferenciasPuntos>? TransferenciasEnviadas { get; set; }
+
+        // Transferencias de puntos recibidas por este usuario
+        [InverseProperty("UsuarioReceptor")]
+        public ICollection<TransferenciasPuntos>? TransferenciasRecibidas { get; set; }
+
+        // Estilo de aprendizaje del usuario (1:1)
+        public EstilosAprendizaje? EstiloAprendizaje { get; set; }
     }
 }

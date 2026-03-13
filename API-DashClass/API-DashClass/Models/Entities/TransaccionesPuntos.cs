@@ -1,3 +1,4 @@
+using System;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
@@ -20,7 +21,7 @@ namespace API_DashClass.Models.Entities
             Asistencia,
             Evaluacion,
             Social,
-            Recomensa,
+            Recompensa,
             Manual
         }
 
@@ -60,7 +61,18 @@ namespace API_DashClass.Models.Entities
         public string? Descripcion { get; set; }
 
         [Column("fecha_creacion")]
-        [Required]
         public DateTime FechaCreacion { get; set; }
+
+        // ========================================
+        // NAVIGATION PROPERTIES
+        // ========================================
+
+        // Usuario al que pertenece esta transacción (FK)
+        [ForeignKey("IdUsuario")]
+        public Usuario? Usuario { get; set; }
+
+        // Curso en el que ocurrió esta transacción (FK)
+        [ForeignKey("IdCurso")]
+        public Cursos? Curso { get; set; }
     }
 }

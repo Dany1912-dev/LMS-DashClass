@@ -1,10 +1,9 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using System;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace API_DashClass.Models.Entities
 {
-
-
     [Table("metodos_auth_users")]
     public class MetodosAuthUsers
     {
@@ -29,9 +28,9 @@ namespace API_DashClass.Models.Entities
         [Column("proveedor")]
         public EnumsProveedorAuth ProveedorAuth { get; set; }
 
-        [Column("id_usuarios_proveedor")]
+        [Column("id_usuario_proveedor")]
         [MaxLength(255)]
-        public string? IdUsuariosProveedor { get; set; }
+        public string? IdUsuarioProveedor { get; set; }
 
         [Column("contrasena_hash")]
         [MaxLength(255)]
@@ -42,19 +41,27 @@ namespace API_DashClass.Models.Entities
         public string? Telefono { get; set; }
 
         [Column("telefono_verificado")]
-        public bool TelefonoVerificado { get; set; } = false;
+        public bool TelefonoVerificado { get; set; }
 
         [Column("email")]
         [MaxLength(255)]
         public string? Email { get; set; }
 
         [Column("verificado")]
-        public bool Verificado { get; set; } = false;
+        public bool Verificado { get; set; }
 
-        [Column("verificado_en")]
-        public DateTime VerificadoEn { get; set; }
+        [Column("vinculado_en")]
+        public DateTime VinculadoEn { get; set; }
 
         [Column("ultimo_uso")]
         public DateTime? UltimoUso { get; set; }
+
+        // ========================================
+        // NAVIGATION PROPERTIES
+        // ========================================
+
+        // Usuario al que pertenece este método de autenticación (FK)
+        [ForeignKey("IdUsuario")]
+        public Usuario? Usuario { get; set; }
     }
 }

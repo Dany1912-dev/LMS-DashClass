@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
@@ -11,8 +10,7 @@ namespace API_DashClass.Models.Entities
         public enum MetodoAsistencia
         {
             QR,
-            Codigo,
-            Geolocalizacion
+            CodigoManual
         }
 
         [Key]
@@ -27,12 +25,23 @@ namespace API_DashClass.Models.Entities
         [Required]
         public int IdUsuario { get; set; }
 
-
         [Column("metodo_usado")]
         [Required]
         public MetodoAsistencia MetodoUsado { get; set; }
 
         [Column("fecha_registro")]
         public DateTime FechaRegistro { get; set; }
+
+        // ========================================
+        // NAVIGATION PROPERTIES
+        // ========================================
+
+        // Sesión de asistencia a la que pertenece este registro (FK)
+        [ForeignKey("IdSesionAsistencia")]
+        public SesionesAsistencia? SesionAsistencia { get; set; }
+
+        // Usuario (estudiante) que registró asistencia (FK)
+        [ForeignKey("IdUsuario")]
+        public Usuario? Estudiante { get; set; }
     }
 }

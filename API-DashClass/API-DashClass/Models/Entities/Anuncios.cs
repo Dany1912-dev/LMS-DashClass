@@ -1,3 +1,5 @@
+using System;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
@@ -8,7 +10,7 @@ namespace API_DashClass.Models.Entities
     {
         [Key]
         [Column("id_anuncio")]
-        public int Id { get; set; }
+        public int IdAnuncio { get; set; }
 
         [Column("id_curso")]
         [Required]
@@ -26,8 +28,8 @@ namespace API_DashClass.Models.Entities
         [Required]
         public string Contenido { get; set; }
 
-        [Column("destacado")]
-        public bool Destacado { get; set; }
+        [Column("es_importante")]
+        public bool EsImportante { get; set; }
 
         [Column("estatus")]
         public bool Estatus { get; set; }
@@ -41,5 +43,24 @@ namespace API_DashClass.Models.Entities
 
         [Column("fecha_ultima_edicion")]
         public DateTime? FechaUltimaEdicion { get; set; }
+
+        // ========================================
+        // NAVIGATION PROPERTIES
+        // ========================================
+
+        // Curso al que pertenece este anuncio (FK)
+        [ForeignKey("IdCurso")]
+        public Cursos? Curso { get; set; }
+
+        // Grupo al que está dirigido este anuncio (opcional) (FK)
+        [ForeignKey("IdGrupo")]
+        public Grupos? Grupo { get; set; }
+
+        // Usuario (profesor) que publicó este anuncio (FK)
+        [ForeignKey("IdUsuario")]
+        public Usuario? PublicadoPor { get; set; }
+
+        // Materiales adjuntos a este anuncio
+        public ICollection<MaterialesAnuncio>? Materiales { get; set; }
     }
 }

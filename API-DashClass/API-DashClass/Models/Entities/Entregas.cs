@@ -34,13 +34,30 @@ namespace API_DashClass.Models.Entities
         public DateTime FechaEntrega { get; set; }
 
         [Column("es_tardia")]
-        public bool EsTardia { get; set; } = false;
+        public bool EsTardia { get; set; }
 
         [Column("version")]
-        public int Version { get; set; } = 1;
+        public int Version { get; set; }
 
         [Column("estado")]
-        public EstadoEntrega Estado { get; set; } = EstadoEntrega.Entregada;
+        public EstadoEntrega Estado { get; set; }
 
+        // ========================================
+        // NAVIGATION PROPERTIES
+        // ========================================
+
+        // Actividad a la que pertenece esta entrega (FK)
+        [ForeignKey("IdActividad")]
+        public Actividades? Actividad { get; set; }
+
+        // Usuario (estudiante) que hizo esta entrega (FK)
+        [ForeignKey("IdUsuario")]
+        public Usuario? Estudiante { get; set; }
+
+        // Recursos (archivos/enlaces) adjuntos a esta entrega
+        public ICollection<RecursosEntrega>? Recursos { get; set; }
+
+        // Calificación de esta entrega (1:1, opcional)
+        public Calificaciones? Calificacion { get; set; }
     }
 }
