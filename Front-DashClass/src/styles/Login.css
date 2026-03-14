@@ -1,0 +1,179 @@
+@font-face {
+  font-family: "Malik";
+  src: url("../assets/fonts/MalikTrial-Bold.ttf") format("truetype");
+}
+
+.login-container {
+  position: relative;
+  width: 100vw;
+  height: 100vh;
+  background-color: #2d2d2d;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.titulo-principal {
+  color: #8db36a;
+  font-size: 5rem;
+  font-family: "Malik", sans-serif;
+  margin-top: -1rem;
+  margin-bottom: 1.5rem;
+  z-index: 1;
+  text-shadow: 0px 2px 15px rgba(0, 0, 0, 0.8);
+}
+
+.login-card {
+  background-color: #3a3a3a;
+  border-radius: 12px;
+  padding: 2.5rem;
+  width: 100%;
+  max-width: 420px;
+  z-index: 1;
+  border: 1px solid #8db36a;
+  box-shadow: 0px 20px 60px rgba(0, 0, 0, 0.6);
+}
+
+.titulo-form {
+  color: white;
+  font-size: 2rem;
+  font-family: "Malik", sans-serif;
+  margin-top: 0;
+  margin-bottom: 1.5rem;
+}
+
+.campo {
+  margin-bottom: 1.2rem;
+}
+
+.campo label {
+  display: block;
+  color: white;
+  font-size: 0.85rem;
+  font-weight: 600;
+  margin-bottom: 0.4rem;
+}
+
+.campo input {
+  width: 100%;
+  padding: 0.7rem 1rem;
+  border: none;
+  border-radius: 6px;
+  background-color: #555;
+  color: white;
+  font-size: 0.9rem;
+  box-sizing: border-box;
+}
+
+.btn-principal {
+  width: 100%;
+  padding: 0.85rem;
+  background-color: #8db36a;
+  color: white;
+  border: none;
+  border-radius: 25px;
+  font-size: 1rem;
+  font-weight: 700;
+  cursor: pointer;
+  margin-top: 1rem;
+}
+
+.btn-principal:hover {
+  background-color: #7aa058;
+}
+
+.texto-registro {
+  color: #aaa;
+  text-align: center;
+  font-size: 0.85rem;
+  margin-top: 1.2rem;
+  margin-bottom: 0.4rem;
+}
+
+.btn-secundario {
+  display: block;
+  margin: 0 auto;
+  padding: 0.4rem 1.5rem;
+  background-color: transparent;
+  color: white;
+  border: 1px solid #888;
+  border-radius: 25px;
+  font-size: 0.85rem;
+  cursor: pointer;
+}
+
+.btn-secundario:hover {
+  background-color: #555;
+}
+
+.img-fondo {
+  position: absolute;
+  opacity: 0.4;
+}
+
+.img-libros {
+  width: 350px;
+  bottom: 15%;
+  left: 15%;
+}
+
+.img-lapiz {
+  width: 250px;
+  top: 10%;
+  left: 10%;
+}
+
+.img-globo {
+  width: 250px;
+  top: 5%;
+  right: 10%;
+}
+
+.img-regla {
+  width: 350px;
+  bottom: 8%;
+  right: 15%;
+}
+
+.img-google {
+  width: 50px;
+  height: 50px;
+  object-fit: contain;
+  cursor: pointer;
+  position: relative;
+  top: 0px;
+  margin-right: 30px;
+}
+
+.img-facebook {
+  width: 62.8px;
+  height: 62.8px;
+  object-fit: contain;
+  cursor: pointer;
+  position: relative;
+  top: -1px;
+  margin-right: 30px;
+}
+
+.img-microsoft {
+  width: 43px;
+  height: 43px;
+  object-fit: contain;
+  cursor: pointer;
+  position: relative;
+  top: -1px;
+}
+
+.contenedor-logos {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.img-google:hover,
+.img-facebook:hover,
+.img-microsoft:hover {
+  opacity: 0.8;
+}
