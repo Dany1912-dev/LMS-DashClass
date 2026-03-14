@@ -1,5 +1,7 @@
-using Microsoft.EntityFrameworkCore;
 using API_DashClass.Data;
+using API_DashClass.Services.Implementaciones;
+using API_DashClass.Services.Interfaces;
+using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -15,6 +17,12 @@ builder.Services.AddDbContext<AppDbContext>(options =>
         ServerVersion.AutoDetect(connectionString)
     )
 );
+
+//Registrar servicios de gamificación
+builder.Services.AddScoped<IGamificationService, GamificationService>();
+builder.Services.AddScoped<IRecompensaService, RecompensaService>();
+builder.Services.AddScoped<ICanjeService, CanjeService>();
+builder.Services.AddScoped<ILogroService, LogroService>();
 
 // Configurar Controllers
 builder.Services.AddControllers();
