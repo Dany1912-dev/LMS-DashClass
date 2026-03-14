@@ -22,6 +22,7 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 builder.Services.AddScoped<IGamificationService, GamificationService>();
 builder.Services.AddScoped<IRecompensaService, RecompensaService>();
 builder.Services.AddScoped<ICanjeService, CanjeService>();
+builder.Services.AddScoped<ILogroService, LogroService>();
 
 // Configurar Controllers
 builder.Services.AddControllers();
