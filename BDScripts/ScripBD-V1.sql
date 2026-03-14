@@ -480,3 +480,15 @@ CREATE TABLE respuestas_estudiantes (
     INDEX index_usuario (id_usuario),
     INDEX index_pregunta (id_pregunta)
 )ENGINE=InnoDB;
+
+CREATE TABLE refresh_tokens (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    id_usuario INT NOT NULL,
+    token VARCHAR(255) UNIQUE NOT NULL,
+    expiracion DATETIME NOT NULL,
+    creado_en DATETIME DEFAULT CURRENT_TIMESTAMP,
+    revocado BOOLEAN DEFAULT FALSE,
+
+    FOREIGN KEY (id_usuario) REFERENCES usuarios(id_usuario) ON DELETE CASCADE,
+    INDEX index_usuario (id_usuario)
+)ENGINE=InnoDB;

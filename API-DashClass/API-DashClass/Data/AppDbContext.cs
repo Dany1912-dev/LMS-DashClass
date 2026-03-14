@@ -56,6 +56,9 @@ namespace API_DashClass.Data
         // Estilos de aprendizaje
         public DbSet<EstilosAprendizaje> EstilosAprendizaje { get; set; }
 
+        // Autenticación
+        public DbSet<RefreshToken> RefreshTokens { get; set; }
+
         // ========================================
         // CONFIGURACIÓN DEL MODELO
         // ========================================
@@ -367,6 +370,27 @@ namespace API_DashClass.Data
             modelBuilder.Entity<TransferenciasPuntos>()
                 .Property(t => t.Anonima)
                 .HasDefaultValue(false);
+
+            // ========================================
+            // REFRESH TOKENS
+            // ========================================
+
+            // RefreshToken - Token único
+            modelBuilder.Entity<RefreshToken>()
+                .HasIndex(r => r.Token)
+                .IsUnique();
+
+            // RefreshToken - Revocado por defecto
+            modelBuilder.Entity<RefreshToken>()
+                .Property(r => r.Revocado)
+                .HasDefaultValue(false);
+
+            // RefreshToken - Relación con Usuario
+            modelBuilder.Entity<RefreshToken>()
+                .HasOne(r => r.Usuario)
+                .WithMany()
+                .HasForeignKey(r => r.IdUsuario)
+                .OnDelete(DeleteBehavior.Cascade);
         }
     }
 }
