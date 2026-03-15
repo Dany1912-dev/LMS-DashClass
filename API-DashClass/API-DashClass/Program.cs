@@ -1,7 +1,11 @@
 using API_DashClass.Data;
 using API_DashClass.Services.Implementaciones;
 using API_DashClass.Services.Interfaces;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
+using Resend;
+using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -18,11 +22,50 @@ builder.Services.AddDbContext<AppDbContext>(options =>
     )
 );
 
-//Registrar servicios de gamificación
+// Registrar servicios de gamificación
 builder.Services.AddScoped<IGamificationService, GamificationService>();
 builder.Services.AddScoped<IRecompensaService, RecompensaService>();
 builder.Services.AddScoped<ICanjeService, CanjeService>();
 builder.Services.AddScoped<ILogroService, LogroService>();
+
+// Registrar servicio de autenticación
+builder.Services.AddScoped<IAuthService, AuthService>();
+
+// Registrar servicio de email (Resend)
+builder.Services.AddScoped<IEmailService, EmailService>();
+builder.Services.AddHttpClient<IResend, ResendClient>();
+builder.Services.Configure<ResendClientOptions>(options =>
+{
+    options.ApiToken = builder.Configuration["ResendSettings:ApiKey"]
+        ?? throw new InvalidOperationException("Resend API Key no configurada en appsettings");
+});
+
+// Registrar IMemoryCache para códigos de verificación
+builder.Services.AddMemoryCache();
+
+// Configurar JWT
+var jwtKey = builder.Configuration["JwtSettings:Secret"]
+    ?? throw new InvalidOperationException("JWT Secret no configurado en appsettings");
+var jwtIssuer = builder.Configuration["JwtSettings:Issuer"]
+    ?? throw new InvalidOperationException("JWT Issuer no configurado en appsettings");
+var jwtAudience = builder.Configuration["JwtSettings:Audience"]
+    ?? throw new InvalidOperationException("JWT Audience no configurado en appsettings");
+
+builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+    .AddJwtBearer(options =>
+    {
+        options.TokenValidationParameters = new TokenValidationParameters
+        {
+            ValidateIssuer = true,
+            ValidateAudience = true,
+            ValidateLifetime = true,
+            ValidateIssuerSigningKey = true,
+            ValidIssuer = jwtIssuer,
+            ValidAudience = jwtAudience,
+            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey)),
+            ClockSkew = TimeSpan.Zero
+        };
+    });
 
 // Configurar Controllers
 builder.Services.AddControllers();
@@ -70,9 +113,9 @@ app.UseHttpsRedirection();
 // Servir archivos estáticos desde la carpeta uploads
 app.UseStaticFiles();
 
-// Autenticación y Autorización (configurar después)
-// app.UseAuthentication();
-// app.UseAuthorization();
+// Autenticación y Autorización
+app.UseAuthentication();
+app.UseAuthorization();
 
 // Mapear controllers
 app.MapControllers();
