@@ -177,3 +177,12 @@
 .img-microsoft:hover {
   opacity: 0.8;
 }
+
+.texto-error {
+  background-color: #4a2020;
+  color: #ff8080;
+  padding: 0.6rem 1rem;
+  border-radius: 8px;
+  font-size: 0.85rem;
+  margin-bottom: 1rem;
+}
