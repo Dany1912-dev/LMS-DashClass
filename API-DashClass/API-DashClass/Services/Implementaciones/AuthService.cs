@@ -32,6 +32,12 @@ namespace API_DashClass.Services.Implementaciones
         // REGISTER
         // ========================================
 
+        /// <summary>
+        /// Si EnableEmailVerification = true:
+        ///   Guarda datos en caché, manda código, NO crea el usuario todavía.
+        /// Si EnableEmailVerification = false:
+        ///   Crea el usuario directo y devuelve JWT.
+        /// </summary>
         public async Task<AuthResponse> RegisterAsync(AuthRegisterRequest request)
         {
             var emailExiste = await _context.Usuarios
@@ -42,40 +48,37 @@ namespace API_DashClass.Services.Implementaciones
 
             var enableEmailVerification = _configuration.GetValue<bool>("AuthSettings:EnableEmailVerification");
 
-            var nuevoUsuario = new Usuario
-            {
-                Email = request.Email,
-                Nombre = request.Nombre,
-                Apellidos = request.Apellidos,
-                ProveedorAuthPrincipal = "Local",
-                FechaCreacion = DateTime.UtcNow,
-                UltimoAcceso = DateTime.UtcNow,
-                Estatus = true
-            };
-
-            _context.Usuarios.Add(nuevoUsuario);
-            await _context.SaveChangesAsync();
-
-            var metodoAuth = new MetodosAuthUsers
-            {
-                IdUsuario = nuevoUsuario.IdUsuario,
-                ProveedorAuth = MetodosAuthUsers.EnumsProveedorAuth.Local,
-                Email = request.Email,
-                ContrasenaHash = BCrypt.Net.BCrypt.HashPassword(request.Contrasena),
-                Verificado = !enableEmailVerification,
-                VinculadoEn = DateTime.UtcNow
-            };
-
-            _context.MetodosAuthUsers.Add(metodoAuth);
-            await _context.SaveChangesAsync();
-
             if (enableEmailVerification)
             {
+                // Verificar si ya hay un registro pendiente para este email
+                var cacheKey = $"verify_email_{request.Email}";
+                if (_cache.TryGetValue(cacheKey, out _))
+                    throw new InvalidOperationException("Ya se mandó un código a este correo. Espera 15 minutos o verifica tu bandeja.");
+
+                // Guardar datos del usuario en caché temporalmente
+                var datosRegistro = new DatosRegistroPendiente
+                {
+                    Email = request.Email,
+                    Nombre = request.Nombre,
+                    Apellidos = request.Apellidos,
+                    ContrasenaHash = BCrypt.Net.BCrypt.HashPassword(request.Contrasena)
+                };
+
                 var codigo = GenerarCodigo6Digitos();
-                _cache.Set($"verify_email_{request.Email}", codigo, TimeSpan.FromMinutes(15));
+                _cache.Set(cacheKey, new DatosVerificacionEmail
+                {
+                    Codigo = codigo,
+                    DatosRegistro = datosRegistro
+                }, TimeSpan.FromMinutes(15));
+
                 await _emailService.EnviarCodigoVerificacionEmailAsync(request.Email, request.Nombre, codigo);
-                return new AuthResponse { Mensaje = "Registro exitoso. Revisa tu correo para verificar tu cuenta." };
+
+                return new AuthResponse { Mensaje = "Código enviado. Revisa tu correo para completar el registro." };
             }
+
+            // Modo simple: crear usuario directo
+            var nuevoUsuario = await CrearUsuarioAsync(request.Email, request.Nombre, request.Apellidos,
+                BCrypt.Net.BCrypt.HashPassword(request.Contrasena), verificado: true);
 
             return await GenerarAuthResponseAsync(nuevoUsuario);
         }
@@ -84,40 +87,48 @@ namespace API_DashClass.Services.Implementaciones
         // VERIFICAR EMAIL
         // ========================================
 
+        /// <summary>
+        /// Verifica el código, crea el usuario en BD y devuelve JWT
+        /// </summary>
         public async Task<AuthResponse> VerificarEmailAsync(VerificarEmailRequest request)
         {
             var cacheKey = $"verify_email_{request.Email}";
 
-            if (!_cache.TryGetValue(cacheKey, out string? codigoGuardado))
-                throw new InvalidOperationException("El código ha expirado. Solicita uno nuevo.");
+            if (!_cache.TryGetValue(cacheKey, out DatosVerificacionEmail? datosCache) || datosCache == null)
+                throw new InvalidOperationException("El código ha expirado. Regístrate de nuevo.");
 
-            if (codigoGuardado != request.Codigo)
+            if (datosCache.Codigo != request.Codigo)
                 throw new InvalidOperationException("Código incorrecto");
 
-            var metodoAuth = await _context.MetodosAuthUsers
-                .FirstOrDefaultAsync(m => m.Email == request.Email &&
-                                          m.ProveedorAuth == MetodosAuthUsers.EnumsProveedorAuth.Local)
-                ?? throw new InvalidOperationException("Usuario no encontrado");
+            // Verificar que el email no se haya registrado mientras esperaba
+            var emailExiste = await _context.Usuarios
+                .AnyAsync(u => u.Email == request.Email);
 
-            metodoAuth.Verificado = true;
-            metodoAuth.UltimoUso = DateTime.UtcNow;
-            await _context.SaveChangesAsync();
+            if (emailExiste)
+                throw new InvalidOperationException("El email ya está registrado");
+
+            // Ahora sí crear el usuario en BD
+            var nuevoUsuario = await CrearUsuarioAsync(
+                datosCache.DatosRegistro.Email,
+                datosCache.DatosRegistro.Nombre,
+                datosCache.DatosRegistro.Apellidos,
+                datosCache.DatosRegistro.ContrasenaHash,
+                verificado: true
+            );
+
             _cache.Remove(cacheKey);
 
-            var usuario = await _context.Usuarios
-                .FirstOrDefaultAsync(u => u.Email == request.Email)
-                ?? throw new InvalidOperationException("Usuario no encontrado");
-
-            usuario.UltimoAcceso = DateTime.UtcNow;
-            await _context.SaveChangesAsync();
-
-            return await GenerarAuthResponseAsync(usuario);
+            return await GenerarAuthResponseAsync(nuevoUsuario);
         }
 
         // ========================================
         // LOGIN
         // ========================================
 
+        /// <summary>
+        /// Si Enable2FA = true: manda código 2FA, no devuelve JWT todavía.
+        /// Si Enable2FA = false: devuelve JWT directo.
+        /// </summary>
         public async Task<AuthResponse> LoginAsync(AuthLoginRequest request)
         {
             var usuario = await _context.Usuarios
@@ -240,6 +251,41 @@ namespace API_DashClass.Services.Implementaciones
         // MÉTODOS PRIVADOS AUXILIARES
         // ========================================
 
+        /// <summary>
+        /// Crea el usuario y su método de auth Local en BD
+        /// </summary>
+        private async Task<Usuario> CrearUsuarioAsync(string email, string nombre, string apellidos, string contrasenaHash, bool verificado)
+        {
+            var nuevoUsuario = new Usuario
+            {
+                Email = email,
+                Nombre = nombre,
+                Apellidos = apellidos,
+                ProveedorAuthPrincipal = "Local",
+                FechaCreacion = DateTime.UtcNow,
+                UltimoAcceso = DateTime.UtcNow,
+                Estatus = true
+            };
+
+            _context.Usuarios.Add(nuevoUsuario);
+            await _context.SaveChangesAsync();
+
+            var metodoAuth = new MetodosAuthUsers
+            {
+                IdUsuario = nuevoUsuario.IdUsuario,
+                ProveedorAuth = MetodosAuthUsers.EnumsProveedorAuth.Local,
+                Email = email,
+                ContrasenaHash = contrasenaHash,
+                Verificado = verificado,
+                VinculadoEn = DateTime.UtcNow
+            };
+
+            _context.MetodosAuthUsers.Add(metodoAuth);
+            await _context.SaveChangesAsync();
+
+            return nuevoUsuario;
+        }
+
         private async Task<AuthResponse> GenerarAuthResponseAsync(Usuario usuario)
         {
             var expirationMinutes = int.Parse(
@@ -323,5 +369,23 @@ namespace API_DashClass.Services.Implementaciones
         {
             return RandomNumberGenerator.GetInt32(100000, 999999).ToString();
         }
+    }
+
+    // ========================================
+    // CLASES AUXILIARES PARA CACHÉ
+    // ========================================
+
+    public class DatosRegistroPendiente
+    {
+        public string Email { get; set; } = string.Empty;
+        public string Nombre { get; set; } = string.Empty;
+        public string Apellidos { get; set; } = string.Empty;
+        public string ContrasenaHash { get; set; } = string.Empty;
+    }
+
+    public class DatosVerificacionEmail
+    {
+        public string Codigo { get; set; } = string.Empty;
+        public DatosRegistroPendiente DatosRegistro { get; set; } = new();
     }
 }
