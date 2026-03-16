@@ -40,6 +40,9 @@ builder.Services.Configure<ResendClientOptions>(options =>
         ?? throw new InvalidOperationException("Resend API Key no configurada en appsettings");
 });
 
+// .- .. --.. ---
+builder.Services.AddScoped<ICursoService, CursoService>();
+
 // Registrar IMemoryCache para códigos de verificación
 builder.Services.AddMemoryCache();
 

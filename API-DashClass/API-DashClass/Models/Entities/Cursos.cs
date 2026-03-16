@@ -36,7 +36,7 @@ namespace API_DashClass.Models.Entities
         [Column("fecha_creacion")]
         public DateTime FechaCreacion { get; set; }
 
-        [Column("estatus")]
+        [Column("activo")]
         public bool Estatus { get; set; }
 
 
