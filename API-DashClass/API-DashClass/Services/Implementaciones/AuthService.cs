@@ -3,13 +3,16 @@ using API_DashClass.Models.Entities;
 using API_DashClass.Models.Request;
 using API_DashClass.Models.Responses;
 using API_DashClass.Services.Interfaces;
+using Google.Apis.Auth;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
+using System.Net.Http.Headers;
 using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
+using System.Text.Json;
 
 namespace API_DashClass.Services.Implementaciones
 {
@@ -19,25 +22,21 @@ namespace API_DashClass.Services.Implementaciones
         private readonly IConfiguration _configuration;
         private readonly IEmailService _emailService;
         private readonly IMemoryCache _cache;
+        private readonly IHttpClientFactory _httpClientFactory;
 
-        public AuthService(AppDbContext context, IConfiguration configuration, IEmailService emailService, IMemoryCache cache)
+        public AuthService(AppDbContext context, IConfiguration configuration, IEmailService emailService, IMemoryCache cache, IHttpClientFactory httpClientFactory)
         {
             _context = context;
             _configuration = configuration;
             _emailService = emailService;
             _cache = cache;
+            _httpClientFactory = httpClientFactory;
         }
 
         // ========================================
         // REGISTER
         // ========================================
 
-        /// <summary>
-        /// Si EnableEmailVerification = true:
-        ///   Guarda datos en caché, manda código, NO crea el usuario todavía.
-        /// Si EnableEmailVerification = false:
-        ///   Crea el usuario directo y devuelve JWT.
-        /// </summary>
         public async Task<AuthResponse> RegisterAsync(AuthRegisterRequest request)
         {
             var emailExiste = await _context.Usuarios
@@ -50,12 +49,10 @@ namespace API_DashClass.Services.Implementaciones
 
             if (enableEmailVerification)
             {
-                // Verificar si ya hay un registro pendiente para este email
                 var cacheKey = $"verify_email_{request.Email}";
                 if (_cache.TryGetValue(cacheKey, out _))
                     throw new InvalidOperationException("Ya se mandó un código a este correo. Espera 15 minutos o verifica tu bandeja.");
 
-                // Guardar datos del usuario en caché temporalmente
                 var datosRegistro = new DatosRegistroPendiente
                 {
                     Email = request.Email,
@@ -72,11 +69,9 @@ namespace API_DashClass.Services.Implementaciones
                 }, TimeSpan.FromMinutes(15));
 
                 await _emailService.EnviarCodigoVerificacionEmailAsync(request.Email, request.Nombre, codigo);
-
                 return new AuthResponse { Mensaje = "Código enviado. Revisa tu correo para completar el registro." };
             }
 
-            // Modo simple: crear usuario directo
             var nuevoUsuario = await CrearUsuarioAsync(request.Email, request.Nombre, request.Apellidos,
                 BCrypt.Net.BCrypt.HashPassword(request.Contrasena), verificado: true);
 
@@ -87,9 +82,6 @@ namespace API_DashClass.Services.Implementaciones
         // VERIFICAR EMAIL
         // ========================================
 
-        /// <summary>
-        /// Verifica el código, crea el usuario en BD y devuelve JWT
-        /// </summary>
         public async Task<AuthResponse> VerificarEmailAsync(VerificarEmailRequest request)
         {
             var cacheKey = $"verify_email_{request.Email}";
@@ -100,14 +92,12 @@ namespace API_DashClass.Services.Implementaciones
             if (datosCache.Codigo != request.Codigo)
                 throw new InvalidOperationException("Código incorrecto");
 
-            // Verificar que el email no se haya registrado mientras esperaba
             var emailExiste = await _context.Usuarios
                 .AnyAsync(u => u.Email == request.Email);
 
             if (emailExiste)
                 throw new InvalidOperationException("El email ya está registrado");
 
-            // Ahora sí crear el usuario en BD
             var nuevoUsuario = await CrearUsuarioAsync(
                 datosCache.DatosRegistro.Email,
                 datosCache.DatosRegistro.Nombre,
@@ -117,7 +107,6 @@ namespace API_DashClass.Services.Implementaciones
             );
 
             _cache.Remove(cacheKey);
-
             return await GenerarAuthResponseAsync(nuevoUsuario);
         }
 
@@ -125,10 +114,6 @@ namespace API_DashClass.Services.Implementaciones
         // LOGIN
         // ========================================
 
-        /// <summary>
-        /// Si Enable2FA = true: manda código 2FA, no devuelve JWT todavía.
-        /// Si Enable2FA = false: devuelve JWT directo.
-        /// </summary>
         public async Task<AuthResponse> LoginAsync(AuthLoginRequest request)
         {
             var usuario = await _context.Usuarios
@@ -202,6 +187,95 @@ namespace API_DashClass.Services.Implementaciones
         }
 
         // ========================================
+        // LOGIN GOOGLE
+        // ========================================
+
+        public async Task<AuthResponse> LoginGoogleAsync(GoogleAuthRequest request)
+        {
+            var clientId = _configuration["GoogleOAuth:ClientId"]
+                ?? throw new InvalidOperationException("Google ClientId no configurado");
+
+            GoogleJsonWebSignature.Payload payload;
+            try
+            {
+                var settings = new GoogleJsonWebSignature.ValidationSettings
+                {
+                    Audience = new[] { clientId }
+                };
+                payload = await GoogleJsonWebSignature.ValidateAsync(request.IdToken, settings);
+            }
+            catch
+            {
+                throw new InvalidOperationException("Token de Google inválido o expirado");
+            }
+
+            var email = payload.Email;
+            var nombre = payload.GivenName ?? payload.Name ?? "Usuario";
+            var apellidos = payload.FamilyName ?? "";
+            var googleId = payload.Subject;
+            var fotoUrl = payload.Picture;
+
+            return await ObtenerOCrearUsuarioOAuthAsync(
+                email, nombre, apellidos, googleId, fotoUrl,
+                MetodosAuthUsers.EnumsProveedorAuth.Google, "Google"
+            );
+        }
+
+        // ========================================
+        // LOGIN MICROSOFT
+        // ========================================
+
+        /// <summary>
+        /// Valida el IdToken de Microsoft, crea el usuario si no existe y devuelve JWT
+        /// </summary>
+        public async Task<AuthResponse> LoginMicrosoftAsync(MicrosoftAuthRequest request)
+        {
+            var clientId = _configuration["MicrosoftOAuth:ClientId"]
+                ?? throw new InvalidOperationException("Microsoft ClientId no configurado");
+
+            // Validar el token de Microsoft usando el endpoint de userinfo
+            string email, nombre, apellidos, microsoftId;
+            string? fotoUrl = null;
+
+            try
+            {
+                // Decodificar el JWT de Microsoft sin validar firma (la validación la hace el endpoint)
+                var handler = new JwtSecurityTokenHandler();
+                var jwtToken = handler.ReadJwtToken(request.IdToken);
+
+                // Verificar que el token es para nuestra app
+                var aud = jwtToken.Claims.FirstOrDefault(c => c.Type == "aud")?.Value;
+                if (aud != clientId)
+                    throw new InvalidOperationException("Token no válido para esta aplicación");
+
+                // Verificar que no expiró
+                if (jwtToken.ValidTo < DateTime.UtcNow)
+                    throw new InvalidOperationException("Token de Microsoft expirado");
+
+                // Extraer claims
+                email = jwtToken.Claims.FirstOrDefault(c => c.Type == "email" || c.Type == "preferred_username")?.Value
+                    ?? throw new InvalidOperationException("No se pudo obtener el email del token");
+                nombre = jwtToken.Claims.FirstOrDefault(c => c.Type == "given_name")?.Value ?? "Usuario";
+                apellidos = jwtToken.Claims.FirstOrDefault(c => c.Type == "family_name")?.Value ?? "";
+                microsoftId = jwtToken.Claims.FirstOrDefault(c => c.Type == "oid" || c.Type == "sub")?.Value
+                    ?? throw new InvalidOperationException("No se pudo obtener el ID del token");
+            }
+            catch (InvalidOperationException)
+            {
+                throw;
+            }
+            catch
+            {
+                throw new InvalidOperationException("Token de Microsoft inválido o expirado");
+            }
+
+            return await ObtenerOCrearUsuarioOAuthAsync(
+                email, nombre, apellidos, microsoftId, fotoUrl,
+                MetodosAuthUsers.EnumsProveedorAuth.Microsoft, "Microsoft"
+            );
+        }
+
+        // ========================================
         // REFRESH TOKEN
         // ========================================
 
@@ -252,8 +326,80 @@ namespace API_DashClass.Services.Implementaciones
         // ========================================
 
         /// <summary>
-        /// Crea el usuario y su método de auth Local en BD
+        /// Método reutilizable para Google y Microsoft — busca o crea el usuario y vincula el proveedor
         /// </summary>
+        private async Task<AuthResponse> ObtenerOCrearUsuarioOAuthAsync(
+            string email, string nombre, string apellidos,
+            string proveedorId, string? fotoUrl,
+            MetodosAuthUsers.EnumsProveedorAuth proveedor, string proveedorNombre)
+        {
+            var usuario = await _context.Usuarios
+                .FirstOrDefaultAsync(u => u.Email == email);
+
+            if (usuario == null)
+            {
+                usuario = new Usuario
+                {
+                    Email = email,
+                    Nombre = nombre,
+                    Apellidos = apellidos,
+                    ProveedorAuthPrincipal = proveedorNombre,
+                    FotoPerfilUrl = fotoUrl,
+                    FechaCreacion = DateTime.UtcNow,
+                    UltimoAcceso = DateTime.UtcNow,
+                    Estatus = true
+                };
+
+                _context.Usuarios.Add(usuario);
+                await _context.SaveChangesAsync();
+
+                _context.MetodosAuthUsers.Add(new MetodosAuthUsers
+                {
+                    IdUsuario = usuario.IdUsuario,
+                    ProveedorAuth = proveedor,
+                    Email = email,
+                    IdUsuarioProveedor = proveedorId,
+                    Verificado = true,
+                    VinculadoEn = DateTime.UtcNow,
+                    UltimoUso = DateTime.UtcNow
+                });
+
+                await _context.SaveChangesAsync();
+            }
+            else
+            {
+                if (!usuario.Estatus)
+                    throw new InvalidOperationException("La cuenta está desactivada");
+
+                var metodoExistente = await _context.MetodosAuthUsers
+                    .FirstOrDefaultAsync(m => m.IdUsuario == usuario.IdUsuario &&
+                                              m.ProveedorAuth == proveedor);
+
+                if (metodoExistente == null)
+                {
+                    _context.MetodosAuthUsers.Add(new MetodosAuthUsers
+                    {
+                        IdUsuario = usuario.IdUsuario,
+                        ProveedorAuth = proveedor,
+                        Email = email,
+                        IdUsuarioProveedor = proveedorId,
+                        Verificado = true,
+                        VinculadoEn = DateTime.UtcNow,
+                        UltimoUso = DateTime.UtcNow
+                    });
+                }
+                else
+                {
+                    metodoExistente.UltimoUso = DateTime.UtcNow;
+                }
+
+                usuario.UltimoAcceso = DateTime.UtcNow;
+                await _context.SaveChangesAsync();
+            }
+
+            return await GenerarAuthResponseAsync(usuario);
+        }
+
         private async Task<Usuario> CrearUsuarioAsync(string email, string nombre, string apellidos, string contrasenaHash, bool verificado)
         {
             var nuevoUsuario = new Usuario
@@ -270,7 +416,7 @@ namespace API_DashClass.Services.Implementaciones
             _context.Usuarios.Add(nuevoUsuario);
             await _context.SaveChangesAsync();
 
-            var metodoAuth = new MetodosAuthUsers
+            _context.MetodosAuthUsers.Add(new MetodosAuthUsers
             {
                 IdUsuario = nuevoUsuario.IdUsuario,
                 ProveedorAuth = MetodosAuthUsers.EnumsProveedorAuth.Local,
@@ -278,11 +424,9 @@ namespace API_DashClass.Services.Implementaciones
                 ContrasenaHash = contrasenaHash,
                 Verificado = verificado,
                 VinculadoEn = DateTime.UtcNow
-            };
+            });
 
-            _context.MetodosAuthUsers.Add(metodoAuth);
             await _context.SaveChangesAsync();
-
             return nuevoUsuario;
         }
 

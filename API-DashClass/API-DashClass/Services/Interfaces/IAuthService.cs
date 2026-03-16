@@ -11,5 +11,7 @@ namespace API_DashClass.Services.Interfaces
         Task<AuthResponse> Verificar2FAAsync(Verificar2FARequest request);
         Task<AuthResponse> RefreshTokenAsync(string refreshToken);
         Task<bool> LogoutAsync(string refreshToken);
+        Task<AuthResponse> LoginGoogleAsync(GoogleAuthRequest request);
+        Task<AuthResponse> LoginMicrosoftAsync(MicrosoftAuthRequest request);
     }
 }
