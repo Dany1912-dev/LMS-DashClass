@@ -1,4 +1,6 @@
 using API_DashClass.Data;
+using API_DashClass.Events;
+using API_DashClass.Events.Handlers;
 using API_DashClass.Services.Implementaciones;
 using API_DashClass.Services.Interfaces;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -8,6 +10,15 @@ using Resend;
 using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
+
+// ========================================
+// REGISTRAR SISTEMA DE EVENTOS
+// ========================================
+builder.Services.AddSingleton<BusEventos>();
+
+// Registrar manejadores de eventos
+builder.Services.AddScoped<CalificacionCreadaManejador>();
+builder.Services.AddScoped<AsistenciaRegistradaManejador>();
 
 // ========================================
 // CONFIGURAR SERVICIOS
