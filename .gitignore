@@ -24,3 +24,5 @@ dist/
 # Logs
 *.log
 BDScripts/prueba.html
+
+Front-DashClass/.env
