@@ -4,4 +4,5 @@ export const API = {
   register: `${BASE_URL}/api/Auth/register`,
   login: `${BASE_URL}/api/Auth/login`,
   googleLogin: `${BASE_URL}/api/Auth/google`,
+  microsoftLogin: `${BASE_URL}/api/Auth/microsoft`,
 };

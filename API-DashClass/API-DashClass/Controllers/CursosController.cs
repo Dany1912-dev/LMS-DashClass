@@ -48,10 +48,8 @@ namespace API_DashClass.Controllers
             try
             {
                 var curso = await _cursoService.ObtenerCursoPorIdAsync(id);
-
                 if (curso == null)
                     return NotFound(new { message = "Curso no encontrado" });
-
                 return Ok(curso);
             }
             catch (Exception ex)
@@ -110,10 +108,8 @@ namespace API_DashClass.Controllers
             try
             {
                 var resultado = await _cursoService.CambiarEstatusCursoAsync(id, estatus);
-
                 if (!resultado)
                     return NotFound(new { message = "Curso no encontrado" });
-
                 return Ok(new { message = estatus ? "Curso activado" : "Curso desactivado" });
             }
             catch (Exception ex)
@@ -160,6 +156,47 @@ namespace API_DashClass.Controllers
             catch (Exception ex)
             {
                 return StatusCode(500, new { message = "Error al obtener miembros", error = ex.Message });
+            }
+        }
+
+        /// <summary>
+        /// Crea una nueva invitación para un grupo específico
+        /// </summary>
+        [HttpPost("{id}/invitaciones")]
+        public async Task<IActionResult> CrearInvitacion(int id, [FromBody] CrearInvitacionRequest request)
+        {
+            try
+            {
+                if (!ModelState.IsValid)
+                    return BadRequest(ModelState);
+
+                var invitacion = await _cursoService.CrearInvitacionAsync(id, request);
+                return Ok(new { message = "Invitación creada exitosamente", data = invitacion });
+            }
+            catch (InvalidOperationException ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = "Error al crear invitación", error = ex.Message });
+            }
+        }
+
+        /// <summary>
+        /// Obtiene todas las invitaciones activas de un curso
+        /// </summary>
+        [HttpGet("{id}/invitaciones")]
+        public async Task<IActionResult> ObtenerInvitaciones(int id)
+        {
+            try
+            {
+                var invitaciones = await _cursoService.ObtenerInvitacionesAsync(id);
+                return Ok(new { total = invitaciones.Count, invitaciones });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = "Error al obtener invitaciones", error = ex.Message });
             }
         }
     }

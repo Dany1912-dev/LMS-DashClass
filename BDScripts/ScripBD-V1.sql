@@ -96,7 +96,7 @@ CREATE TABLE miembros_curso (
 CREATE TABLE invitaciones_curso (
     id_invitacion INT PRIMARY KEY AUTO_INCREMENT,
     id_curso INT NOT NULL,
-    id_grupo INT,
+    id_grupo INT NOT NULL,
     tipo ENUM('Codigo', 'Enlace') NOT NULL,
     codigo VARCHAR(6),
     token VARCHAR(255),

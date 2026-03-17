@@ -12,10 +12,5 @@ namespace API_DashClass.Models.Request
         /// </summary>
         [Required(ErrorMessage = "El código o token es requerido")]
         public string CodigoOToken { get; set; } = string.Empty;
-
-        /// <summary>
-        /// ID del grupo al que se une (opcional)
-        /// </summary>
-        public int? IdGrupo { get; set; }
     }
 }
