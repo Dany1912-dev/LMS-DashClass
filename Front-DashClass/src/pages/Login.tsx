@@ -2,6 +2,7 @@ import "../styles/Login.css";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { GoogleLogin } from "@react-oauth/google";
+import { useMsal } from "@azure/msal-react";
 import { API } from "../api";
 import regla from "../assets/login/img_login_1.png";
 import globo from "../assets/login/img_login_2.png";
@@ -17,6 +18,7 @@ export default function Login() {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
+  const { instance } = useMsal();
 
   const handleLogin = async () => {
     setError("");
@@ -45,7 +47,6 @@ export default function Login() {
   };
 
   const handleGoogleSuccess = async (credentialResponse: any) => {
-    console.log("Google response:", credentialResponse);
     setLoading(true);
     try {
       const response = await fetch(API.googleLogin, {
@@ -61,6 +62,34 @@ export default function Login() {
       navigate("/dashboard");
     } catch (err: any) {
       setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleMicrosoftLogin = async () => {
+    try {
+      const result = await instance.loginPopup({
+        scopes: ["openid", "profile", "email"],
+        redirectUri: "http://localhost:5173/blank.html",
+      });
+      setLoading(true);
+      const response = await fetch(API.microsoftLogin, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ idToken: result.idToken }),
+      });
+      if (!response.ok)
+        throw new Error("Error al iniciar sesión con Microsoft");
+      const data = await response.json();
+      localStorage.setItem("token", data.data.accessToken);
+      localStorage.setItem("refreshToken", data.data.refreshToken);
+      localStorage.setItem("usuario", JSON.stringify(data.data.usuario));
+      navigate("/dashboard");
+    } catch (err: any) {
+      if (err.errorCode !== "user_cancelled") {
+        setError(err.message);
+      }
     } finally {
       setLoading(false);
     }
@@ -145,6 +174,8 @@ export default function Login() {
             src={microsoft}
             alt="microsoft"
             draggable="false"
+            onClick={handleMicrosoftLogin}
+            style={{ cursor: "pointer", pointerEvents: "auto" }}
           />
         </div>
 
