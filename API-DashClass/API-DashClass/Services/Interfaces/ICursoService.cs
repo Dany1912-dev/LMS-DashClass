@@ -6,7 +6,7 @@ namespace API_DashClass.Services.Interfaces
     public interface ICursoService
     {
         /// <summary>
-        /// Crea un nuevo curso con grupos iniciales y genera invitación
+        /// Crea un nuevo curso con grupos iniciales y genera invitaciones por grupo
         /// </summary>
         Task<CursoResponse> CrearCursoAsync(CrearCursoRequest request);
 
@@ -16,7 +16,7 @@ namespace API_DashClass.Services.Interfaces
         Task<CursoResponse?> ObtenerCursoPorIdAsync(int idCurso);
 
         /// <summary>
-        /// Obtiene todos los cursos de un usuario (como profesor o estudiante)
+        /// Obtiene todos los cursos de un usuario
         /// </summary>
         Task<List<CursoResponse>> ObtenerCursosDeUsuarioAsync(int idUsuario);
 
@@ -39,5 +39,15 @@ namespace API_DashClass.Services.Interfaces
         /// Obtiene los miembros de un curso
         /// </summary>
         Task<List<MiembroCursoResponse>> ObtenerMiembrosCursoAsync(int idCurso);
+
+        /// <summary>
+        /// Crea una nueva invitación para un grupo específico
+        /// </summary>
+        Task<InvitacionCursoResponse> CrearInvitacionAsync(int idCurso, CrearInvitacionRequest request);
+
+        /// <summary>
+        /// Obtiene todas las invitaciones activas de un curso
+        /// </summary>
+        Task<List<InvitacionCursoResponse>> ObtenerInvitacionesAsync(int idCurso);
     }
 }
