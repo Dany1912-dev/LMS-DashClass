@@ -14,7 +14,6 @@ namespace API_DashClass.Models.Responses
         public int TotalEstudiantes { get; set; }
         public int TotalGrupos { get; set; }
         public List<GrupoResponse> Grupos { get; set; } = new();
-        public InvitacionCursoResponse? Invitacion { get; set; }
     }
 
     public class GrupoResponse
@@ -24,6 +23,7 @@ namespace API_DashClass.Models.Responses
         public string? Descripcion { get; set; }
         public bool Estatus { get; set; }
         public int TotalMiembros { get; set; }
+        public InvitacionCursoResponse? Invitacion { get; set; }
     }
 
     public class InvitacionCursoResponse
@@ -31,6 +31,8 @@ namespace API_DashClass.Models.Responses
         public string? Codigo { get; set; }
         public string? Token { get; set; }
         public string? EnlaceInvitacion { get; set; }
+        public string? NombreGrupo { get; set; }
+        public DateTime? FechaExpiracion { get; set; }
     }
 
     public class MiembroCursoResponse

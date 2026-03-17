@@ -14,15 +14,14 @@ namespace API_DashClass.Models.Request
         [MaxLength(500, ErrorMessage = "La URL de imagen no puede exceder 500 caracteres")]
         public string? ImagenBanner { get; set; }
 
-        /// <summary>
-        /// ID del usuario que crea el curso (profesor)
-        /// </summary>
         [Required(ErrorMessage = "El ID del usuario es requerido")]
         public int IdUsuario { get; set; }
 
         /// <summary>
-        /// Grupos iniciales del curso (opcional, mínimo 1 si se mandan)
+        /// Grupos iniciales del curso — se requiere al menos uno
         /// </summary>
+        [Required(ErrorMessage = "Debes crear al menos un grupo")]
+        [MinLength(1, ErrorMessage = "Debes crear al menos un grupo")]
         public List<CrearGrupoRequest> Grupos { get; set; } = new();
     }
 
