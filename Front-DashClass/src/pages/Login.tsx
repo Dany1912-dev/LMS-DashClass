@@ -1,6 +1,7 @@
 import "../styles/Login.css";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { GoogleLogin } from "@react-oauth/google";
 import { API } from "../api";
 import regla from "../assets/login/img_login_1.png";
 import globo from "../assets/login/img_login_2.png";
@@ -19,28 +20,44 @@ export default function Login() {
 
   const handleLogin = async () => {
     setError("");
-
     if (!email || !password) {
       setError("Por favor llena todos los campos");
       return;
     }
-
     setLoading(true);
-
     try {
       const response = await fetch(API.login, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, contrasena: password }),
       });
-
       if (!response.ok) throw new Error("Credenciales incorrectas");
-
       const data = await response.json();
       localStorage.setItem("token", data.data.accessToken);
       localStorage.setItem("refreshToken", data.data.refreshToken);
       localStorage.setItem("usuario", JSON.stringify(data.data.usuario));
+      navigate("/dashboard");
+    } catch (err: any) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
 
+  const handleGoogleSuccess = async (credentialResponse: any) => {
+    console.log("Google response:", credentialResponse);
+    setLoading(true);
+    try {
+      const response = await fetch(API.googleLogin, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ idToken: credentialResponse.credential }),
+      });
+      if (!response.ok) throw new Error("Error al iniciar sesión con Google");
+      const data = await response.json();
+      localStorage.setItem("token", data.data.accessToken);
+      localStorage.setItem("refreshToken", data.data.refreshToken);
+      localStorage.setItem("usuario", JSON.stringify(data.data.usuario));
       navigate("/dashboard");
     } catch (err: any) {
       setError(err.message);
@@ -102,12 +119,21 @@ export default function Login() {
         </div>
 
         <div className="contenedor-logos">
-          <img
-            className="img-google"
-            src={google}
-            alt="google"
-            draggable="false"
-          />
+          <div className="google-btn-wrapper">
+            <GoogleLogin
+              onSuccess={handleGoogleSuccess}
+              onError={() => setError("Error al iniciar sesión con Google")}
+              type="icon"
+              shape="circle"
+              size="large"
+            />
+            <img
+              className="img-google"
+              src={google}
+              alt="google"
+              draggable="false"
+            />
+          </div>
           <img
             className="img-facebook"
             src={facebook}
