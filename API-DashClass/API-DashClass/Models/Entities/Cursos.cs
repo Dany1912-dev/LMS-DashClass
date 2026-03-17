@@ -39,7 +39,6 @@ namespace API_DashClass.Models.Entities
         [Column("estatus")]
         public bool Estatus { get; set; }
 
-
         // ========================================
         // NAVIGATION PROPERTIES
         // ========================================
