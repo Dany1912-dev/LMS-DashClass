@@ -48,51 +48,11 @@ namespace API_DashClass.Services.Implementaciones
             _context.Cursos.Add(nuevoCurso);
             await _context.SaveChangesAsync();
 
-            // Crear grupos y sus invitaciones automáticas (1 semana por defecto)
-            var gruposCreados = new List<Grupos>();
             foreach (var grupoRequest in request.Grupos)
             {
-                var grupo = new Grupos
-                {
-                    IdCurso = nuevoCurso.IdCurso,
-                    Nombre = grupoRequest.Nombre,
-                    Descripcion = grupoRequest.Descripcion,
-                    FechaCreacion = DateTime.UtcNow,
-                    Estatus = true
-                };
-                _context.Grupos.Add(grupo);
-                await _context.SaveChangesAsync();
-
-                // Invitación por código para este grupo (1 semana)
-                _context.InvitacionesCurso.Add(new InvitacionesCurso
-                {
-                    IdCurso = nuevoCurso.IdCurso,
-                    IdGrupo = grupo.IdGrupo,
-                    Tipo = InvitacionesCurso.TipoInvitacion.Codigo,
-                    Codigo = GenerarCodigoInvitacion(),
-                    FechaCreacion = DateTime.UtcNow,
-                    FechaExpiracion = DateTime.UtcNow.AddDays(7),
-                    Estatus = true
-                });
-
-                // Invitación por enlace para este grupo (1 semana)
-                _context.InvitacionesCurso.Add(new InvitacionesCurso
-                {
-                    IdCurso = nuevoCurso.IdCurso,
-                    IdGrupo = grupo.IdGrupo,
-                    Tipo = InvitacionesCurso.TipoInvitacion.Enlace,
-                    Token = GenerarTokenEnlace(),
-                    FechaCreacion = DateTime.UtcNow,
-                    FechaExpiracion = DateTime.UtcNow.AddDays(7),
-                    Estatus = true
-                });
-
-                gruposCreados.Add(grupo);
+                await CrearGrupoConInvitacionAsync(nuevoCurso.IdCurso, grupoRequest, DateTime.UtcNow.AddDays(7));
             }
 
-            await _context.SaveChangesAsync();
-
-            // Registrar al creador como profesor
             _context.MiembrosCurso.Add(new MiembrosCursos
             {
                 IdCurso = nuevoCurso.IdCurso,
@@ -204,7 +164,6 @@ namespace API_DashClass.Services.Implementaciones
                 .FirstOrDefaultAsync(u => u.IdUsuario == request.IdUsuario)
                 ?? throw new InvalidOperationException("Usuario no encontrado");
 
-            // Buscar invitación por código o token
             var invitacion = await _context.InvitacionesCurso
                 .FirstOrDefaultAsync(i =>
                     (i.Codigo == request.CodigoOToken || i.Token == request.CodigoOToken) &&
@@ -213,16 +172,13 @@ namespace API_DashClass.Services.Implementaciones
             if (invitacion == null)
                 throw new InvalidOperationException("Código o enlace inválido");
 
-            // Verificar expiración
             if (invitacion.FechaExpiracion.HasValue && invitacion.FechaExpiracion < DateTime.UtcNow)
                 throw new InvalidOperationException("La invitación ha expirado");
 
-            // Verificar que el curso está activo
             var curso = await _context.Cursos
                 .FirstOrDefaultAsync(c => c.IdCurso == invitacion.IdCurso && c.Estatus == true)
                 ?? throw new InvalidOperationException("El curso no está disponible");
 
-            // Verificar que no sea ya miembro
             var yaEsMiembro = await _context.MiembrosCurso
                 .AnyAsync(m => m.IdCurso == curso.IdCurso &&
                                m.IdUsuario == request.IdUsuario &&
@@ -231,7 +187,6 @@ namespace API_DashClass.Services.Implementaciones
             if (yaEsMiembro)
                 throw new InvalidOperationException("Ya eres miembro de este curso");
 
-            // Unirse al curso en el grupo de la invitación
             _context.MiembrosCurso.Add(new MiembrosCursos
             {
                 IdCurso = curso.IdCurso,
@@ -294,17 +249,14 @@ namespace API_DashClass.Services.Implementaciones
 
         public async Task<InvitacionCursoResponse> CrearInvitacionAsync(int idCurso, CrearInvitacionRequest request)
         {
-            // Verificar que el curso existe
             var curso = await _context.Cursos
                 .FirstOrDefaultAsync(c => c.IdCurso == idCurso)
                 ?? throw new InvalidOperationException("Curso no encontrado");
 
-            // Verificar que el grupo existe y pertenece al curso
             var grupo = await _context.Grupos
                 .FirstOrDefaultAsync(g => g.IdGrupo == request.IdGrupo && g.IdCurso == idCurso)
                 ?? throw new InvalidOperationException("El grupo no existe en este curso");
 
-            // Calcular fecha de expiración
             DateTime? fechaExpiracion = request.Duracion switch
             {
                 DuracionInvitacion.UnDia => DateTime.UtcNow.AddDays(1),
@@ -317,7 +269,6 @@ namespace API_DashClass.Services.Implementaciones
             var codigoInvitacion = GenerarCodigoInvitacion();
             var tokenEnlace = GenerarTokenEnlace();
 
-            // Crear invitación por código
             _context.InvitacionesCurso.Add(new InvitacionesCurso
             {
                 IdCurso = idCurso,
@@ -329,7 +280,6 @@ namespace API_DashClass.Services.Implementaciones
                 Estatus = true
             });
 
-            // Crear invitación por enlace
             _context.InvitacionesCurso.Add(new InvitacionesCurso
             {
                 IdCurso = idCurso,
@@ -399,8 +349,147 @@ namespace API_DashClass.Services.Implementaciones
         }
 
         // ========================================
+        // AGREGAR GRUPO
+        // ========================================
+
+        public async Task<GrupoResponse> AgregarGrupoAsync(int idCurso, CrearGrupoRequest request)
+        {
+            var curso = await _context.Cursos
+                .FirstOrDefaultAsync(c => c.IdCurso == idCurso)
+                ?? throw new InvalidOperationException("Curso no encontrado");
+
+            var grupo = await CrearGrupoConInvitacionAsync(idCurso, request, DateTime.UtcNow.AddDays(7));
+
+            var invCodigo = await _context.InvitacionesCurso
+                .FirstOrDefaultAsync(i => i.IdGrupo == grupo.IdGrupo &&
+                                          i.Tipo == InvitacionesCurso.TipoInvitacion.Codigo);
+
+            var invEnlace = await _context.InvitacionesCurso
+                .FirstOrDefaultAsync(i => i.IdGrupo == grupo.IdGrupo &&
+                                          i.Tipo == InvitacionesCurso.TipoInvitacion.Enlace);
+
+            var baseUrl = _configuration["AppSettings:BaseUrl"] ?? "https://localhost:7120";
+
+            return new GrupoResponse
+            {
+                IdGrupo = grupo.IdGrupo,
+                Nombre = grupo.Nombre,
+                Descripcion = grupo.Descripcion,
+                Estatus = grupo.Estatus,
+                TotalMiembros = 0,
+                Invitacion = new InvitacionCursoResponse
+                {
+                    Codigo = invCodigo?.Codigo,
+                    Token = invEnlace?.Token,
+                    EnlaceInvitacion = invEnlace?.Token != null
+                        ? $"{baseUrl}/api/cursos/unirse?token={invEnlace.Token}"
+                        : null,
+                    NombreGrupo = grupo.Nombre,
+                    FechaExpiracion = invCodigo?.FechaExpiracion
+                }
+            };
+        }
+
+        // ========================================
+        // OBTENER GRUPOS POR CURSO
+        // ========================================
+
+        public async Task<List<GrupoResponse>> ObtenerGruposPorCursoAsync(int idCurso)
+        {
+            var cursoExiste = await _context.Cursos.AnyAsync(c => c.IdCurso == idCurso);
+            if (!cursoExiste)
+                throw new InvalidOperationException("Curso no encontrado");
+
+            var grupos = await _context.Grupos
+                .Where(g => g.IdCurso == idCurso && g.Estatus == true)
+                .ToListAsync();
+
+            var invitaciones = await _context.InvitacionesCurso
+                .Where(i => i.IdCurso == idCurso && i.Estatus == true)
+                .ToListAsync();
+
+            var baseUrl = _configuration["AppSettings:BaseUrl"] ?? "https://localhost:7120";
+            var responses = new List<GrupoResponse>();
+
+            foreach (var grupo in grupos)
+            {
+                var totalMiembros = await _context.MiembrosCurso
+                    .CountAsync(m => m.IdGrupo == grupo.IdGrupo && m.Estatus == true);
+
+                var invCodigo = invitaciones.FirstOrDefault(i =>
+                    i.IdGrupo == grupo.IdGrupo &&
+                    i.Tipo == InvitacionesCurso.TipoInvitacion.Codigo);
+
+                var invEnlace = invitaciones.FirstOrDefault(i =>
+                    i.IdGrupo == grupo.IdGrupo &&
+                    i.Tipo == InvitacionesCurso.TipoInvitacion.Enlace);
+
+                responses.Add(new GrupoResponse
+                {
+                    IdGrupo = grupo.IdGrupo,
+                    Nombre = grupo.Nombre,
+                    Descripcion = grupo.Descripcion,
+                    Estatus = grupo.Estatus,
+                    TotalMiembros = totalMiembros,
+                    Invitacion = new InvitacionCursoResponse
+                    {
+                        Codigo = invCodigo?.Codigo,
+                        Token = invEnlace?.Token,
+                        EnlaceInvitacion = invEnlace?.Token != null
+                            ? $"{baseUrl}/api/cursos/unirse?token={invEnlace.Token}"
+                            : null,
+                        NombreGrupo = grupo.Nombre,
+                        FechaExpiracion = invCodigo?.FechaExpiracion
+                    }
+                });
+            }
+
+            return responses;
+        }
+
+        // ========================================
         // MÉTODOS PRIVADOS AUXILIARES
         // ========================================
+
+        private async Task<Grupos> CrearGrupoConInvitacionAsync(int idCurso, CrearGrupoRequest request, DateTime? fechaExpiracion)
+        {
+            var grupo = new Grupos
+            {
+                IdCurso = idCurso,
+                Nombre = request.Nombre,
+                Descripcion = request.Descripcion,
+                FechaCreacion = DateTime.UtcNow,
+                Estatus = true
+            };
+
+            _context.Grupos.Add(grupo);
+            await _context.SaveChangesAsync();
+
+            _context.InvitacionesCurso.Add(new InvitacionesCurso
+            {
+                IdCurso = idCurso,
+                IdGrupo = grupo.IdGrupo,
+                Tipo = InvitacionesCurso.TipoInvitacion.Codigo,
+                Codigo = GenerarCodigoInvitacion(),
+                FechaCreacion = DateTime.UtcNow,
+                FechaExpiracion = fechaExpiracion,
+                Estatus = true
+            });
+
+            _context.InvitacionesCurso.Add(new InvitacionesCurso
+            {
+                IdCurso = idCurso,
+                IdGrupo = grupo.IdGrupo,
+                Tipo = InvitacionesCurso.TipoInvitacion.Enlace,
+                Token = GenerarTokenEnlace(),
+                FechaCreacion = DateTime.UtcNow,
+                FechaExpiracion = fechaExpiracion,
+                Estatus = true
+            });
+
+            await _context.SaveChangesAsync();
+            return grupo;
+        }
 
         private async Task<string> GenerarCodigoUnicoAsync()
         {
@@ -446,8 +535,8 @@ namespace API_DashClass.Services.Implementaciones
                                  m.Estatus == true);
 
             var baseUrl = _configuration["AppSettings:BaseUrl"] ?? "https://localhost:7120";
-
             var gruposResponse = new List<GrupoResponse>();
+
             foreach (var grupo in grupos)
             {
                 var totalMiembros = await _context.MiembrosCurso

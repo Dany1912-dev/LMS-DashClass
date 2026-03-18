@@ -23,20 +23,12 @@ namespace API_DashClass.Controllers
         {
             try
             {
-                if (!ModelState.IsValid)
-                    return BadRequest(ModelState);
-
+                if (!ModelState.IsValid) return BadRequest(ModelState);
                 var curso = await _cursoService.CrearCursoAsync(request);
                 return Ok(new { message = "Curso creado exitosamente", data = curso });
             }
-            catch (InvalidOperationException ex)
-            {
-                return BadRequest(new { message = ex.Message });
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, new { message = "Error al crear curso", error = ex.Message });
-            }
+            catch (InvalidOperationException ex) { return BadRequest(new { message = ex.Message }); }
+            catch (Exception ex) { return StatusCode(500, new { message = "Error al crear curso", error = ex.Message }); }
         }
 
         /// <summary>
@@ -48,14 +40,10 @@ namespace API_DashClass.Controllers
             try
             {
                 var curso = await _cursoService.ObtenerCursoPorIdAsync(id);
-                if (curso == null)
-                    return NotFound(new { message = "Curso no encontrado" });
+                if (curso == null) return NotFound(new { message = "Curso no encontrado" });
                 return Ok(curso);
             }
-            catch (Exception ex)
-            {
-                return StatusCode(500, new { message = "Error al obtener curso", error = ex.Message });
-            }
+            catch (Exception ex) { return StatusCode(500, new { message = "Error al obtener curso", error = ex.Message }); }
         }
 
         /// <summary>
@@ -69,10 +57,7 @@ namespace API_DashClass.Controllers
                 var cursos = await _cursoService.ObtenerCursosDeUsuarioAsync(idUsuario);
                 return Ok(new { total = cursos.Count, cursos });
             }
-            catch (Exception ex)
-            {
-                return StatusCode(500, new { message = "Error al obtener cursos", error = ex.Message });
-            }
+            catch (Exception ex) { return StatusCode(500, new { message = "Error al obtener cursos", error = ex.Message }); }
         }
 
         /// <summary>
@@ -83,20 +68,12 @@ namespace API_DashClass.Controllers
         {
             try
             {
-                if (!ModelState.IsValid)
-                    return BadRequest(ModelState);
-
+                if (!ModelState.IsValid) return BadRequest(ModelState);
                 var curso = await _cursoService.ActualizarCursoAsync(id, request);
                 return Ok(new { message = "Curso actualizado exitosamente", data = curso });
             }
-            catch (InvalidOperationException ex)
-            {
-                return NotFound(new { message = ex.Message });
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, new { message = "Error al actualizar curso", error = ex.Message });
-            }
+            catch (InvalidOperationException ex) { return NotFound(new { message = ex.Message }); }
+            catch (Exception ex) { return StatusCode(500, new { message = "Error al actualizar curso", error = ex.Message }); }
         }
 
         /// <summary>
@@ -108,14 +85,10 @@ namespace API_DashClass.Controllers
             try
             {
                 var resultado = await _cursoService.CambiarEstatusCursoAsync(id, estatus);
-                if (!resultado)
-                    return NotFound(new { message = "Curso no encontrado" });
+                if (!resultado) return NotFound(new { message = "Curso no encontrado" });
                 return Ok(new { message = estatus ? "Curso activado" : "Curso desactivado" });
             }
-            catch (Exception ex)
-            {
-                return StatusCode(500, new { message = "Error al cambiar estatus", error = ex.Message });
-            }
+            catch (Exception ex) { return StatusCode(500, new { message = "Error al cambiar estatus", error = ex.Message }); }
         }
 
         /// <summary>
@@ -126,20 +99,12 @@ namespace API_DashClass.Controllers
         {
             try
             {
-                if (!ModelState.IsValid)
-                    return BadRequest(ModelState);
-
+                if (!ModelState.IsValid) return BadRequest(ModelState);
                 var curso = await _cursoService.UnirseACursoAsync(request);
                 return Ok(new { message = "Te has unido al curso exitosamente", data = curso });
             }
-            catch (InvalidOperationException ex)
-            {
-                return BadRequest(new { message = ex.Message });
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, new { message = "Error al unirse al curso", error = ex.Message });
-            }
+            catch (InvalidOperationException ex) { return BadRequest(new { message = ex.Message }); }
+            catch (Exception ex) { return StatusCode(500, new { message = "Error al unirse al curso", error = ex.Message }); }
         }
 
         /// <summary>
@@ -153,10 +118,7 @@ namespace API_DashClass.Controllers
                 var miembros = await _cursoService.ObtenerMiembrosCursoAsync(id);
                 return Ok(new { total = miembros.Count, miembros });
             }
-            catch (Exception ex)
-            {
-                return StatusCode(500, new { message = "Error al obtener miembros", error = ex.Message });
-            }
+            catch (Exception ex) { return StatusCode(500, new { message = "Error al obtener miembros", error = ex.Message }); }
         }
 
         /// <summary>
@@ -167,20 +129,12 @@ namespace API_DashClass.Controllers
         {
             try
             {
-                if (!ModelState.IsValid)
-                    return BadRequest(ModelState);
-
+                if (!ModelState.IsValid) return BadRequest(ModelState);
                 var invitacion = await _cursoService.CrearInvitacionAsync(id, request);
                 return Ok(new { message = "Invitación creada exitosamente", data = invitacion });
             }
-            catch (InvalidOperationException ex)
-            {
-                return BadRequest(new { message = ex.Message });
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, new { message = "Error al crear invitación", error = ex.Message });
-            }
+            catch (InvalidOperationException ex) { return BadRequest(new { message = ex.Message }); }
+            catch (Exception ex) { return StatusCode(500, new { message = "Error al crear invitación", error = ex.Message }); }
         }
 
         /// <summary>
@@ -194,10 +148,38 @@ namespace API_DashClass.Controllers
                 var invitaciones = await _cursoService.ObtenerInvitacionesAsync(id);
                 return Ok(new { total = invitaciones.Count, invitaciones });
             }
-            catch (Exception ex)
+            catch (Exception ex) { return StatusCode(500, new { message = "Error al obtener invitaciones", error = ex.Message }); }
+        }
+
+        /// <summary>
+        /// Agrega un nuevo grupo a un curso existente
+        /// </summary>
+        [HttpPost("{id}/grupos")]
+        public async Task<IActionResult> AgregarGrupo(int id, [FromBody] CrearGrupoRequest request)
+        {
+            try
             {
-                return StatusCode(500, new { message = "Error al obtener invitaciones", error = ex.Message });
+                if (!ModelState.IsValid) return BadRequest(ModelState);
+                var grupo = await _cursoService.AgregarGrupoAsync(id, request);
+                return Ok(new { message = "Grupo agregado exitosamente", data = grupo });
             }
+            catch (InvalidOperationException ex) { return BadRequest(new { message = ex.Message }); }
+            catch (Exception ex) { return StatusCode(500, new { message = "Error al agregar grupo", error = ex.Message }); }
+        }
+
+        /// <summary>
+        /// Obtiene todos los grupos de un curso
+        /// </summary>
+        [HttpGet("{id}/grupos")]
+        public async Task<IActionResult> ObtenerGrupos(int id)
+        {
+            try
+            {
+                var grupos = await _cursoService.ObtenerGruposPorCursoAsync(id);
+                return Ok(new { total = grupos.Count, grupos });
+            }
+            catch (InvalidOperationException ex) { return NotFound(new { message = ex.Message }); }
+            catch (Exception ex) { return StatusCode(500, new { message = "Error al obtener grupos", error = ex.Message }); }
         }
     }
 }
