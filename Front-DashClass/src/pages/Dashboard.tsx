@@ -1,8 +1,8 @@
 import "../styles/Dashboard.css";
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { API } from "../api";
-import logo from "../assets/general/logo_largo.png";
+import Sidebar from "../components/Sidebar";
 import banner1 from "../assets/banners/banner_1.jpg";
 import banner2 from "../assets/banners/banner_2.jpg";
 import banner3 from "../assets/banners/banner_3.jpg";
@@ -37,13 +37,10 @@ interface Curso {
 export default function Dashboard() {
   const [cursos, setCursos] = useState<Curso[]>([]);
   const [loading, setLoading] = useState(true);
-  const [menuAbierto, setMenuAbierto] = useState(false);
-
   const [modalUnirse, setModalUnirse] = useState(false);
   const [codigoInput, setCodigoInput] = useState("");
   const [errorUnirse, setErrorUnirse] = useState("");
   const [loadingUnirse, setLoadingUnirse] = useState(false);
-
   const [modalCrear, setModalCrear] = useState(false);
   const [errorCrear, setErrorCrear] = useState("");
   const [loadingCrear, setLoadingCrear] = useState(false);
@@ -54,7 +51,6 @@ export default function Dashboard() {
     descripcionGrupo: "",
     banner: banner1,
   });
-
   const [modalEditar, setModalEditar] = useState(false);
   const [cursoEditando, setCursoEditando] = useState<Curso | null>(null);
   const [errorEditar, setErrorEditar] = useState("");
@@ -65,28 +61,13 @@ export default function Dashboard() {
     banner: banner1,
   });
 
-  const menuRef = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
-
   const usuario = JSON.parse(localStorage.getItem("usuario") || "{}");
-  const inicial = usuario.nombre ? usuario.nombre.charAt(0).toUpperCase() : "?";
-
-  useEffect(() => {
-    const handleClickFuera = (e: MouseEvent) => {
-      if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
-        setMenuAbierto(false);
-      }
-    };
-    document.addEventListener("mousedown", handleClickFuera);
-    return () => document.removeEventListener("mousedown", handleClickFuera);
-  }, []);
 
   const cargarCursos = async () => {
     try {
       const response = await fetch(API.cursosPorUsuario(usuario.idUsuario), {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
-        },
+        headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
       });
       const data = await response.json();
       setCursos(data.cursos);
@@ -100,24 +81,6 @@ export default function Dashboard() {
   useEffect(() => {
     cargarCursos();
   }, []);
-
-  const handleLogout = async () => {
-    try {
-      const refreshToken = localStorage.getItem("refreshToken");
-      await fetch(API.logout, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(refreshToken),
-      });
-    } catch (err) {
-      console.error("Error al cerrar sesión:", err);
-    } finally {
-      localStorage.removeItem("token");
-      localStorage.removeItem("refreshToken");
-      localStorage.removeItem("usuario");
-      navigate("/login");
-    }
-  };
 
   const handleUnirse = async () => {
     setErrorUnirse("");
@@ -270,65 +233,182 @@ export default function Dashboard() {
   const cursosAlumno = cursos.filter(
     (curso) => curso.idUsuario !== usuario.idUsuario,
   );
-
   const cursosMaestro = cursos.filter(
     (curso) => curso.idUsuario === usuario.idUsuario,
   );
 
   return (
-    <div className="dashboard-container">
-      {/* Navbar */}
-      <div className="dashboard-navbar">
-        <div className="navbar-izquierda">
-          <div className="navbar-perfil" ref={menuRef}>
-            <div
-              className="navbar-foto-wrapper"
-              onClick={() => setMenuAbierto(!menuAbierto)}
-            >
-              {usuario.fotoPerfilUrl ? (
-                <img
-                  className="navbar-foto"
-                  src={usuario.fotoPerfilUrl}
-                  alt="foto"
-                />
-              ) : (
-                <div className="navbar-foto-placeholder">{inicial}</div>
-              )}
-            </div>
-            {menuAbierto && (
-              <div className="perfil-menu">
-                <div className="perfil-menu-header">
-                  <p className="perfil-menu-nombre">
-                    {usuario.nombre} {usuario.apellidos}
-                  </p>
-                  <p className="perfil-menu-email">{usuario.email}</p>
-                </div>
-                <div className="perfil-menu-divider" />
-                <button className="perfil-menu-item">👤 Mi perfil</button>
-                <div className="perfil-menu-divider" />
-                <button
-                  className="perfil-menu-item perfil-menu-logout"
-                  onClick={handleLogout}
-                >
-                  🚪 Cerrar sesión
-                </button>
-              </div>
-            )}
+    <div className="dashboard-layout">
+      <Sidebar />
+
+      <div className="dashboard-main">
+        {/* Header */}
+        <div className="dashboard-header">
+          <div>
+            <h1 className="dashboard-bienvenida">
+              Bienvenido de nuevo, {usuario.nombre} 👋
+            </h1>
+            <p className="dashboard-subtitulo">Resumen General</p>
           </div>
-          <span className="navbar-saludo">Hola, {usuario.nombre}!</span>
         </div>
 
-        <div className="navbar-centro">
-          <img
-            src={logo}
-            alt="logo"
-            className="navbar-logo"
-            draggable="false"
-          />
+        {/* Estadísticas */}
+        <div className="dashboard-stats">
+          <div className="stat-card">
+            <span className="stat-icon">📚</span>
+            <div>
+              <p className="stat-label">Cursos como Alumno</p>
+              <p className="stat-valor">{cursosAlumno.length}</p>
+            </div>
+          </div>
+          <div className="stat-card">
+            <span className="stat-icon">🎓</span>
+            <div>
+              <p className="stat-label">Cursos como Maestro</p>
+              <p className="stat-valor">{cursosMaestro.length}</p>
+            </div>
+          </div>
+          <div className="stat-card">
+            <span className="stat-icon">👥</span>
+            <div>
+              <p className="stat-label">Total de Cursos</p>
+              <p className="stat-valor">{cursos.length}</p>
+            </div>
+          </div>
         </div>
 
-        <div className="navbar-derecha">
-          <span className="navbar-titulo">Mis Cursos</span>
+        {/* Contenido */}
+        <div className="dashboard-contenido">
+          {loading ? (
+            <div className="dashboard-loading">Cargando cursos...</div>
+          ) : (
+            <>
+              {/* Sección Alumno */}
+              <div className="seccion">
+                <div className="seccion-header">
+                  <div>
+                    <h2 className="seccion-titulo">Alumno</h2>
+                    <p className="seccion-subtitulo">
+                      Cursos en los que estás inscrito
+                    </p>
+                  </div>
+                  <button
+                    className="btn-agregar"
+                    onClick={() => setModalUnirse(true)}
+                  >
+                    + Unirse a curso
+                  </button>
+                </div>
+                {cursosAlumno.length === 0 ? (
+                  <p className="seccion-vacia">
+                    No estás inscrito en ningún curso.
+                  </p>
+                ) : (
+                  <div className="cursos-grid">
+                    {cursosAlumno.map((curso) => (
+                      <div key={curso.idCurso} className="curso-card">
+                        <div className="curso-card-banner-wrapper">
+                          {getBanner(curso.imagenBanner) ? (
+                            <img
+                              src={getBanner(curso.imagenBanner)!}
+                              alt="banner"
+                              className="curso-card-banner"
+                            />
+                          ) : (
+                            <div className="curso-card-banner-placeholder" />
+                          )}
+                          <span className="curso-card-codigo-badge">
+                            {curso.codigo}
+                          </span>
+                        </div>
+                        <div className="curso-card-info">
+                          <p className="curso-card-nombre">{curso.nombre}</p>
+                          <p className="curso-card-descripcion">
+                            {curso.descripcion}
+                          </p>
+                          <div className="curso-card-meta">
+                            <span className="curso-card-profesor">
+                              {curso.nombreProfesor}
+                            </span>
+                            {curso.grupos.length > 0 && (
+                              <span className="curso-card-grupo">
+                                Grupo: {curso.grupos[0].nombre}
+                              </span>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              {/* Sección Maestro */}
+              <div className="seccion">
+                <div className="seccion-header">
+                  <div>
+                    <h2 className="seccion-titulo">Maestro</h2>
+                    <p className="seccion-subtitulo">Cursos que has creado</p>
+                  </div>
+                  <button
+                    className="btn-agregar"
+                    onClick={() => setModalCrear(true)}
+                  >
+                    + Crear curso
+                  </button>
+                </div>
+                {cursosMaestro.length === 0 ? (
+                  <p className="seccion-vacia">No has creado ningún curso.</p>
+                ) : (
+                  <div className="cursos-grid">
+                    {cursosMaestro.map((curso) => (
+                      <div
+                        key={curso.idCurso}
+                        className="curso-card"
+                        onClick={() => navigate(`/curso/${curso.idCurso}`)}
+                      >
+                        <div className="curso-card-banner-wrapper">
+                          {getBanner(curso.imagenBanner) ? (
+                            <img
+                              src={getBanner(curso.imagenBanner)!}
+                              alt="banner"
+                              className="curso-card-banner"
+                            />
+                          ) : (
+                            <div className="curso-card-banner-placeholder" />
+                          )}
+                          <span className="curso-card-codigo-badge">
+                            {curso.codigo}
+                          </span>
+                        </div>
+                        <div className="curso-card-info">
+                          <p className="curso-card-nombre">{curso.nombre}</p>
+                          <p className="curso-card-descripcion">
+                            {curso.descripcion}
+                          </p>
+                          <div className="curso-card-meta">
+                            <span className="curso-card-grupos">
+                              {curso.grupos.length} grupo
+                              {curso.grupos.length !== 1 ? "s" : ""}
+                            </span>
+                          </div>
+                        </div>
+                        <button
+                          className="curso-card-menu-btn"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            abrirEditar(curso);
+                          }}
+                        >
+                          ⋮
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </>
+          )}
         </div>
       </div>
 
@@ -404,7 +484,7 @@ export default function Dashboard() {
               />
             </div>
             <div className="modal-campo">
-              <label>Nombre del grupo</label>
+              <label>Nombre del grupo por defecto</label>
               <input
                 className="modal-input-texto"
                 type="text"
@@ -416,7 +496,7 @@ export default function Dashboard() {
               />
             </div>
             <div className="modal-campo">
-              <label>Descripción del grupo</label>
+              <label>Descripción del grupo (opcional)</label>
               <input
                 className="modal-input-texto"
                 type="text"
@@ -540,112 +620,6 @@ export default function Dashboard() {
           </div>
         </div>
       )}
-
-      {/* Contenido */}
-      <div className="dashboard-contenido">
-        {loading ? (
-          <div className="dashboard-loading">Cargando cursos...</div>
-        ) : (
-          <>
-            <div className="seccion">
-              <div className="seccion-header">
-                <h2 className="seccion-titulo">Alumno</h2>
-                <button
-                  className="btn-seccion"
-                  onClick={() => setModalUnirse(true)}
-                >
-                  +
-                </button>
-              </div>
-              {cursosAlumno.length === 0 ? (
-                <p className="seccion-vacia">
-                  No estás inscrito en ningún curso.
-                </p>
-              ) : (
-                <div className="cursos-grid">
-                  {cursosAlumno.map((curso) => (
-                    <div key={curso.idCurso} className="curso-card">
-                      {getBanner(curso.imagenBanner) ? (
-                        <img
-                          src={getBanner(curso.imagenBanner)!}
-                          alt="banner"
-                          className="curso-card-banner"
-                        />
-                      ) : (
-                        <div className="curso-card-banner-placeholder">📚</div>
-                      )}
-                      <div className="curso-card-info">
-                        <p className="curso-card-nombre">{curso.nombre}</p>
-                        <p className="curso-card-profesor">
-                          {curso.nombreProfesor}
-                        </p>
-                        {curso.grupos.length > 0 && (
-                          <p className="curso-card-grupo">
-                            Grupo: {curso.grupos[0].nombre}
-                          </p>
-                        )}
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-
-            <div className="seccion">
-              <div className="seccion-header">
-                <h2 className="seccion-titulo">Maestro</h2>
-                <button
-                  className="btn-seccion"
-                  onClick={() => setModalCrear(true)}
-                >
-                  +
-                </button>
-              </div>
-              {cursosMaestro.length === 0 ? (
-                <p className="seccion-vacia">No has creado ningún curso.</p>
-              ) : (
-                <div className="cursos-grid">
-                  {cursosMaestro.map((curso) => (
-                    <div key={curso.idCurso} className="curso-card">
-                      {getBanner(curso.imagenBanner) ? (
-                        <img
-                          src={getBanner(curso.imagenBanner)!}
-                          alt="banner"
-                          className="curso-card-banner"
-                        />
-                      ) : (
-                        <div className="curso-card-banner-placeholder">📚</div>
-                      )}
-                      <button
-                        className="curso-card-menu-btn"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          abrirEditar(curso);
-                        }}
-                      >
-                        ⋮
-                      </button>
-                      <div className="curso-card-info">
-                        <p className="curso-card-nombre">{curso.nombre}</p>
-                        {curso.grupos.length > 0 && (
-                          <p className="curso-card-profesor">
-                            Código: {curso.grupos[0].invitacion.codigo}
-                          </p>
-                        )}
-                        {curso.grupos.length > 0 && (
-                          <p className="curso-card-grupo">
-                            Grupo: {curso.grupos[0].nombre}
-                          </p>
-                        )}
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-          </>
-        )}
-      </div>
     </div>
   );
 }

@@ -7,8 +7,10 @@ export const API = {
   microsoftLogin: `${BASE_URL}/api/Auth/microsoft`,
   cursosPorUsuario: (idUsuario: number) =>
     `${BASE_URL}/api/Cursos/usuario/${idUsuario}`,
+  cursoPorId: (idCurso: number) => `${BASE_URL}/api/Cursos/${idCurso}`,
   logout: `${BASE_URL}/api/Auth/logout`,
   unirseACurso: `${BASE_URL}/api/Cursos/unirse`,
   crearCurso: `${BASE_URL}/api/Cursos`,
   editarCurso: (idCurso: number) => `${BASE_URL}/api/Cursos/${idCurso}`,
+  agregarGrupo: (idCurso: number) => `${BASE_URL}/api/Cursos/${idCurso}/grupos`,
 };
