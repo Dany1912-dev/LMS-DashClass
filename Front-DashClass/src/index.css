@@ -1,11 +1,61 @@
-* {
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=DM+Mono:wght@400;500&display=swap');
+
+*, *::before, *::after {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
 }
 
-body {
+:root {
+  --bg-base:       #0d110e;
+  --bg-surface:    #131a14;
+  --bg-elevated:   #1a2419;
+  --bg-hover:      #1f2d1e;
+  --bg-active:     #243322;
+
+  --accent:        #6a9a52;
+  --accent-dim:    #4a7035;
+  --accent-glow:   rgba(106, 154, 82, 0.15);
+  --accent-subtle: rgba(106, 154, 82, 0.08);
+
+  --text-primary:  #e8ede8;
+  --text-secondary:#8fa88a;
+  --text-muted:    #526050;
+  --text-accent:   #8fc272;
+
+  --border:        rgba(106, 154, 82, 0.12);
+  --border-strong: rgba(106, 154, 82, 0.25);
+
+  --red:           #e05c5c;
+  --red-bg:        rgba(224, 92, 92, 0.1);
+  --yellow:        #d4a24a;
+  --yellow-bg:     rgba(212, 162, 74, 0.1);
+  --blue:          #5c9dd4;
+
+  --radius-sm:  6px;
+  --radius-md:  10px;
+  --radius-lg:  14px;
+  --radius-xl:  20px;
+
+  --font-body: 'DM Sans', sans-serif;
+  --font-mono: 'DM Mono', monospace;
+
+  --sidebar-width: 220px;
+  --topbar-height: 60px;
+
+  --shadow-sm: 0 1px 3px rgba(0,0,0,0.3);
+  --shadow-md: 0 4px 16px rgba(0,0,0,0.4);
+  --shadow-lg: 0 8px 32px rgba(0,0,0,0.5);
+}
+
+html, body {
   min-height: 100vh;
+  font-family: var(--font-body);
+  background-color: var(--bg-base);
+  color: var(--text-primary);
+  font-size: 14px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
 }
 
 img {
@@ -18,4 +68,15 @@ img {
 .img-facebook,
 .img-microsoft {
   pointer-events: auto;
+}
+
+::-webkit-scrollbar {
+  width: 4px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: var(--border-strong);
+  border-radius: 4px;
 }

@@ -4,7 +4,10 @@ using API_DashClass.Events.Handlers;
 using API_DashClass.Services.Implementaciones;
 using API_DashClass.Services.Interfaces;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Http.Features;
+using Microsoft.AspNetCore.StaticFiles;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.FileProviders;
 using Microsoft.IdentityModel.Tokens;
 using Resend;
 using System.Text;
@@ -16,7 +19,6 @@ var builder = WebApplication.CreateBuilder(args);
 // ========================================
 builder.Services.AddSingleton<BusEventos>();
 
-// Registrar manejadores de eventos
 builder.Services.AddScoped<CalificacionCreadaManejador>();
 builder.Services.AddScoped<AsistenciaRegistradaManejador>();
 
@@ -24,7 +26,6 @@ builder.Services.AddScoped<AsistenciaRegistradaManejador>();
 // CONFIGURAR SERVICIOS
 // ========================================
 
-// Configurar DbContext con MySQL
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseMySql(
@@ -33,16 +34,23 @@ builder.Services.AddDbContext<AppDbContext>(options =>
     )
 );
 
-// Registrar servicios de gamificación
+// Actividades y categorías
+builder.Services.AddScoped<IActividadService, ActividadService>();
+builder.Services.AddScoped<ICategoriaService, CategoriaService>();
+
+// Entregas y calificaciones
+builder.Services.AddScoped<IEntregaService, EntregaService>();
+
+// Gamificación
 builder.Services.AddScoped<IGamificationService, GamificationService>();
 builder.Services.AddScoped<IRecompensaService, RecompensaService>();
 builder.Services.AddScoped<ICanjeService, CanjeService>();
 builder.Services.AddScoped<ILogroService, LogroService>();
 
-// Registrar servicio de autenticación
+// Auth
 builder.Services.AddScoped<IAuthService, AuthService>();
 
-// Registrar servicio de email (Resend)
+// Email
 builder.Services.AddScoped<IEmailService, EmailService>();
 builder.Services.AddHttpClient<IResend, ResendClient>();
 builder.Services.Configure<ResendClientOptions>(options =>
@@ -51,13 +59,18 @@ builder.Services.Configure<ResendClientOptions>(options =>
         ?? throw new InvalidOperationException("Resend API Key no configurada en appsettings");
 });
 
-// .- .. --.. ---
 builder.Services.AddScoped<ICursoService, CursoService>();
-
 builder.Services.AddScoped<IUsuarioService, UsuarioService>();
 
-// Registrar IMemoryCache para códigos de verificación
 builder.Services.AddMemoryCache();
+
+// ========================================
+// CONFIGURAR LÍMITE DE TAMAÑO DE ARCHIVOS
+// ========================================
+builder.Services.Configure<FormOptions>(options =>
+{
+    options.MultipartBodyLengthLimit = 50 * 1024 * 1024; // 50 MB
+});
 
 // Configurar JWT
 var jwtKey = builder.Configuration["JwtSettings:Secret"]
@@ -83,11 +96,8 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
         };
     });
 
-// Configurar Controllers
 builder.Services.AddControllers();
 
-// Configurar CORS
-// Configurar CORS
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowFrontend", policy =>
@@ -104,7 +114,6 @@ builder.Services.AddCors(options =>
     });
 });
 
-// Configurar Swagger/OpenAPI para desarrollo
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
@@ -118,31 +127,41 @@ var app = builder.Build();
 // CONFIGURAR MIDDLEWARE PIPELINE
 // ========================================
 
-// Swagger solo en desarrollo
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
     app.UseSwaggerUI();
 }
 
-// CORS (debe ir antes de Authorization)
 app.UseCors("AllowFrontend");
-
-// HTTPS Redirection
 app.UseHttpsRedirection();
 
-// Servir archivos estáticos desde la carpeta uploads
-app.UseStaticFiles();
+// ========================================
+// SERVIR ARCHIVOS ESTÁTICOS (uploads)
+// ========================================
+var uploadsPath = Path.Combine(app.Environment.ContentRootPath, "uploads");
+Directory.CreateDirectory(uploadsPath); // crear si no existe
 
-// Autenticación y Autorización
+//Suscribir eventos
+var BusEventos = app.Services.GetRequiredService<BusEventos>();
+BusEventos.Suscribir<CalificacionCreadaEvento, CalificacionCreadaManejador>();
+BusEventos.Suscribir<AsistenciaRegistradaEvento, AsistenciaRegistradaManejador>();
+
+// Proveedor de tipos de contenido — permite cualquier extensión
+var contentTypeProvider = new FileExtensionContentTypeProvider();
+contentTypeProvider.Mappings[".docx"] = "application/vnd.openxmlformats-officedocument.wordprocessingml.document";
+contentTypeProvider.Mappings[".xlsx"] = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
+
+app.UseStaticFiles(new StaticFileOptions
+{
+    FileProvider = new PhysicalFileProvider(uploadsPath),
+    RequestPath = "/uploads",
+    ContentTypeProvider = contentTypeProvider
+});
+
 app.UseAuthentication();
 app.UseAuthorization();
 
-// Mapear controllers
 app.MapControllers();
-
-// ========================================
-// EJECUTAR LA APLICACIÓN
-// ========================================
 
 app.Run();

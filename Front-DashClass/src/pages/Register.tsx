@@ -173,7 +173,7 @@ export default function Register() {
       {exitoso && (
         <div className="modal-overlay">
           <div className="modal-card">
-            <div className="modal-icono">✓</div>
+            <div className="modal-icono"></div>
             <h2 className="modal-titulo">¡Cuenta creada!</h2>
             <p className="modal-mensaje">Tu cuenta fue creada exitosamente.</p>
             <button
