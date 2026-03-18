@@ -111,6 +111,14 @@ CREATE TABLE invitaciones_curso (
     INDEX index_token (token)
 )ENGINE=InnoDB;
 
+CREATE TABLE categorias_actividad (
+    id_categoria INT PRIMARY KEY AUTO_INCREMENT,
+    id_curso INT NOT NULL,
+    nombre VARCHAR(100) NOT NULL,   -- "Tareas", "Exámenes", etc.
+    peso DECIMAL(5,2) NOT NULL,     -- 30.00 = 30%
+    FOREIGN KEY (id_curso) REFERENCES cursos(id_curso)
+);
+
 CREATE TABLE actividades (
     id_actividad INT PRIMARY KEY AUTO_INCREMENT,
     id_curso INT NOT NULL,
@@ -125,9 +133,11 @@ CREATE TABLE actividades (
     fecha_programada DATETIME,
     id_usuario INT NOT NULL,
     fecha_creacion DATETIME DEFAULT CURRENT_TIMESTAMP,
+    id_categoria INT NOT NULL,
     
     FOREIGN KEY (id_curso) REFERENCES cursos(id_curso),
     FOREIGN KEY (id_usuario) REFERENCES usuarios(id_usuario),
+    FOREIGN KEY (id_categoria) REFERENCES categorias_actividad(id_categoria),
     INDEX index_curso (id_curso),
     INDEX index_estatus (estatus),
     INDEX index_usuario (id_usuario)
@@ -492,3 +502,4 @@ CREATE TABLE refresh_tokens (
     FOREIGN KEY (id_usuario) REFERENCES usuarios(id_usuario) ON DELETE CASCADE,
     INDEX index_usuario (id_usuario)
 )ENGINE=InnoDB;
+

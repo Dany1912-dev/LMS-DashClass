@@ -1,5 +1,3 @@
-using System;
-using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
@@ -24,10 +22,13 @@ namespace API_DashClass.Models.Entities
         [Required]
         public int IdCurso { get; set; }
 
+        [Column("id_categoria")]
+        public int? IdCategoria { get; set; }
+
         [Column("titulo")]
         [Required]
         [MaxLength(255)]
-        public string Titulo { get; set; }
+        public string Titulo { get; set; } = string.Empty;
 
         [Column("descripcion")]
         public string? Descripcion { get; set; }
@@ -65,21 +66,17 @@ namespace API_DashClass.Models.Entities
         // NAVIGATION PROPERTIES
         // ========================================
 
-        // Curso al que pertenece esta actividad (FK)
         [ForeignKey("IdCurso")]
         public Cursos? Curso { get; set; }
 
-        // Usuario (profesor) que creó esta actividad (FK)
         [ForeignKey("IdUsuario")]
         public Usuario? CreadoPor { get; set; }
 
-        // Materiales adjuntos a esta actividad
+        [ForeignKey("IdCategoria")]
+        public CategoriasActividad? Categoria { get; set; }
+
         public ICollection<MaterialesActividad>? Materiales { get; set; }
-
-        // Entregas de estudiantes para esta actividad
         public ICollection<Entregas>? Entregas { get; set; }
-
-        // Grupos a los que está asignada esta actividad
         public ICollection<ActividadesGrupos>? ActividadesGrupos { get; set; }
     }
 }

@@ -2,22 +2,16 @@
 
 namespace API_DashClass.Events
 {
-    /// <summary>
-    /// Bus de eventos simple para publicar y suscribirse a eventos
-    /// </summary>
     public class BusEventos
     {
         private readonly ConcurrentDictionary<Type, List<Type>> _manejadores = new();
-        private readonly IServiceProvider _serviceProvider;
+        private readonly IServiceScopeFactory _scopeFactory;
 
-        public BusEventos(IServiceProvider serviceProvider)
+        public BusEventos(IServiceScopeFactory scopeFactory)
         {
-            _serviceProvider = serviceProvider;
+            _scopeFactory = scopeFactory;
         }
 
-        /// <summary>
-        /// Registra un manejador para un tipo de evento
-        /// </summary>
         public void Suscribir<TEvento, TManejador>()
             where TEvento : IEvento
             where TManejador : IManejadorEvento<TEvento>
@@ -26,33 +20,23 @@ namespace API_DashClass.Events
             var tipoManejador = typeof(TManejador);
 
             if (!_manejadores.ContainsKey(tipoEvento))
-            {
                 _manejadores[tipoEvento] = new List<Type>();
-            }
 
             if (!_manejadores[tipoEvento].Contains(tipoManejador))
-            {
                 _manejadores[tipoEvento].Add(tipoManejador);
-            }
         }
 
-        /// <summary>
-        /// Publica un evento y ejecuta todos los manejadores registrados
-        /// </summary>
         public async Task PublicarAsync<TEvento>(TEvento evento) where TEvento : IEvento
         {
             var tipoEvento = typeof(TEvento);
 
-            if (!_manejadores.ContainsKey(tipoEvento))
-            {
-                return; // No hay manejadores registrados para este evento
-            }
+            if (!_manejadores.ContainsKey(tipoEvento)) return;
 
-            var tiposManejadores = _manejadores[tipoEvento];
-
-            foreach (var tipoManejador in tiposManejadores)
+            foreach (var tipoManejador in _manejadores[tipoEvento])
             {
-                var manejador = _serviceProvider.GetService(tipoManejador);
+                // Crear un scope nuevo por cada manejador para resolver servicios Scoped
+                using var scope = _scopeFactory.CreateScope();
+                var manejador = scope.ServiceProvider.GetService(tipoManejador);
 
                 if (manejador is IManejadorEvento<TEvento> manejadorEvento)
                 {
@@ -62,7 +46,6 @@ namespace API_DashClass.Events
                     }
                     catch (Exception ex)
                     {
-                        // Log error pero no detener ejecución de otros manejadores
                         Console.WriteLine($"Error en manejador {tipoManejador.Name}: {ex.Message}");
                     }
                 }

@@ -1,0 +1,198 @@
+/* ══ CURSOS PAGE ══ */
+
+.cursos-page {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+/* Header */
+.cursos-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.cursos-titulo {
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  letter-spacing: -0.02em;
+  margin-bottom: 0.15rem;
+}
+
+.cursos-subtitulo {
+  font-size: 0.82rem;
+  color: var(--text-muted);
+}
+
+.cursos-acciones {
+  display: flex;
+  gap: 0.6rem;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+.btn-unirse {
+  padding: 0.5rem 1rem;
+  background: none;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-sm);
+  color: var(--text-secondary);
+  font-size: 0.85rem;
+  font-family: var(--font-body);
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+}
+
+.btn-unirse:hover { background: var(--bg-hover); color: var(--text-primary); }
+
+.btn-crear {
+  padding: 0.5rem 1rem;
+  background: var(--accent);
+  border: none;
+  border-radius: var(--radius-sm);
+  color: white;
+  font-size: 0.85rem;
+  font-weight: 600;
+  font-family: var(--font-body);
+  cursor: pointer;
+  transition: background 0.15s, box-shadow 0.15s;
+}
+
+.btn-crear:hover { background: var(--accent-dim); box-shadow: 0 4px 12px rgba(106,154,82,0.25); }
+
+/* Tabs */
+.cursos-tabs {
+  display: flex;
+  gap: 4px;
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 3px;
+  width: fit-content;
+}
+
+.cursos-tab {
+  padding: 0.4rem 1rem;
+  border-radius: calc(var(--radius-sm) - 2px);
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  font-size: 0.82rem;
+  font-family: var(--font-body);
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+  white-space: nowrap;
+}
+
+.cursos-tab:hover { color: var(--text-primary); }
+.cursos-tab.active { background: var(--bg-elevated); color: var(--text-primary); font-weight: 600; }
+
+/* Empty state */
+.cursos-vacio {
+  color: var(--text-muted);
+  font-size: 0.85rem;
+  padding: 2rem;
+  text-align: center;
+}
+
+/* Grid */
+.cursos-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 1rem;
+}
+
+/* Card */
+.curso-card {
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  cursor: pointer;
+  transition: transform 0.2s, box-shadow 0.2s, border-color 0.2s;
+}
+
+.curso-card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+  border-color: var(--border-strong);
+}
+
+.curso-card-banner-wrap {
+  position: relative;
+  width: 100%;
+  height: 110px;
+}
+
+.curso-card-banner {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.curso-card-banner-placeholder {
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(135deg, var(--bg-elevated) 0%, var(--accent-dim) 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2.2rem;
+  border-bottom: 1px solid var(--border);
+}
+
+/* Role badge over banner */
+.curso-card-rol {
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  font-size: 0.68rem;
+  font-weight: 600;
+  padding: 0.18rem 0.55rem;
+  border-radius: 99px;
+  letter-spacing: 0.02em;
+}
+
+.rol-maestro {
+  background: rgba(13, 17, 14, 0.75);
+  color: var(--text-accent);
+  border: 1px solid var(--border-strong);
+  backdrop-filter: blur(4px);
+}
+
+.rol-alumno {
+  background: rgba(13, 17, 14, 0.75);
+  color: #8bbce0;
+  border: 1px solid rgba(92,157,212,0.3);
+  backdrop-filter: blur(4px);
+}
+
+.curso-card-info { padding: 0.9rem; }
+
+.curso-card-nombre {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 0.25rem;
+  letter-spacing: -0.01em;
+}
+
+.curso-card-desc {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  margin-bottom: 0.3rem;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.curso-card-profesor {
+  font-size: 0.75rem;
+  color: var(--text-accent);
+  font-family: var(--font-mono);
+}
