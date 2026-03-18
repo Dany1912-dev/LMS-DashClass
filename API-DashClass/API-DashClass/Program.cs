@@ -43,6 +43,8 @@ builder.Services.Configure<ResendClientOptions>(options =>
 // .- .. --.. ---
 builder.Services.AddScoped<ICursoService, CursoService>();
 
+builder.Services.AddScoped<IUsuarioService, UsuarioService>();
+
 // Registrar IMemoryCache para códigos de verificación
 builder.Services.AddMemoryCache();
 
