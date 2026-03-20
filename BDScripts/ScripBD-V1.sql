@@ -116,6 +116,9 @@ CREATE TABLE categorias_actividad (
     id_curso INT NOT NULL,
     nombre VARCHAR(100) NOT NULL,   -- "Tareas", "Exámenes", etc.
     peso DECIMAL(5,2) NOT NULL,     -- 30.00 = 30%
+    descripcion TEXT,
+    fecha_creacion DATETIME DEFAULT CURRENT_TIMESTAMP,
+    
     FOREIGN KEY (id_curso) REFERENCES cursos(id_curso)
 );
 
@@ -502,4 +505,3 @@ CREATE TABLE refresh_tokens (
     FOREIGN KEY (id_usuario) REFERENCES usuarios(id_usuario) ON DELETE CASCADE,
     INDEX index_usuario (id_usuario)
 )ENGINE=InnoDB;
-
