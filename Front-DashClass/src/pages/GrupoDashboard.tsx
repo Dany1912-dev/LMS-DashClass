@@ -264,11 +264,11 @@ export default function GrupoDashboard() {
     await handleCambiarEstatus(idActividad, "Archivado");
   };
 
-  //const getBanner = (imagenBanner: string) => {
-  //  const index = Number(imagenBanner);
-  //  if (!isNaN(index) && index >= 1 && index <= banners.length) return banners[index - 1];
-  //  return null;
-  //};
+  const getBanner = (imagenBanner: string) => {
+    const index = Number(imagenBanner);
+    if (!isNaN(index) && index >= 1 && index <= banners.length) return banners[index - 1];
+    return null;
+  };
 
   const formatFecha = (fecha?: string) => {
     if (!fecha) return null;
