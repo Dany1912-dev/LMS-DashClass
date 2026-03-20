@@ -16,9 +16,10 @@ jobs:
       - name: Compilar API (.NET 9)
         run: |
           cd API-DashClass
-          dotnet publish API-DashClass/API-DashClass.csproj -c Release -o ./publish
+          # Usamos -o ./publish para que los archivos queden en una carpeta facil de encontrar
+          dotnet publish -c Release -o ./publish
+          # Copiamos con sudo (ahora ya no pedira contraseña)
           sudo cp -r ./publish/* /var/www/lms_api/
-          # El comando de abajo reinicia tu API para que use el codigo nuevo
           sudo systemctl restart lms-api.service
 
       # --- TRABAJO CON EL FRONTEND ---
