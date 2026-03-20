@@ -1,4 +1,4 @@
-import "../styles/CursoDashboard.css";
+import "../styles/Cursodashboard.css";
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import Layout from "../components/Layout";
