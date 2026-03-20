@@ -1,0 +1,30 @@
+name: Deploy DashClass Studio
+
+on:
+  push:
+    branches: [ "main" ] # Se activa solo cuando el equipo une sus ramas a main
+
+jobs:
+  build-and-deploy:
+    runs-on: self-hosted # Esto le dice: "Busca mi servidor de Proxmox"
+    
+    steps:
+      - name: Descargar el codigo nuevo
+        uses: actions/checkout@v4
+
+      # --- TRABAJO CON EL BACKEND ---
+      - name: Compilar API (.NET 9)
+        run: |
+          cd API-DashClass
+          dotnet publish API-DashClass/API-DashClass.csproj -c Release -o ./publish
+          sudo cp -r ./publish/* /var/www/lms_api/
+          # El comando de abajo reinicia tu API para que use el codigo nuevo
+          sudo systemctl restart lms-api.service
+
+      # --- TRABAJO CON EL FRONTEND ---
+      - name: Compilar Frontend (React)
+        run: |
+          cd Front-DashClass
+          npm install
+          npm run build
+          sudo cp -r dist/* /var/www/lms_front/
