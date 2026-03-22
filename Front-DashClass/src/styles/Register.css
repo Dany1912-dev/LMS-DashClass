@@ -9,3 +9,104 @@
 .register-card {
   max-width: 420px;
 }
+
+/* ══ VERIFICACION EMAIL ══ */
+
+.verificacion-card {
+  text-align: center;
+}
+
+.verificacion-icono {
+  font-size: 2.5rem;
+  margin-bottom: 0.5rem;
+  color: var(--accent, #6a9a52);
+}
+
+.verificacion-desc {
+  font-size: 0.88rem;
+  color: #aaa;
+  margin-bottom: 1.5rem;
+  line-height: 1.6;
+}
+
+.verificacion-desc strong {
+  color: #ccc;
+}
+
+/* Inputs del código */
+.codigo-inputs {
+  display: flex;
+  gap: 0.5rem;
+  justify-content: center;
+  margin-bottom: 1.5rem;
+}
+
+.codigo-input {
+  width: 46px;
+  height: 56px;
+  border-radius: 10px;
+  border: 1px solid #3a3a3a;
+  background: #1e1e1e;
+  color: #f0f0f0;
+  font-size: 1.4rem;
+  font-weight: 700;
+  text-align: center;
+  outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
+  caret-color: transparent;
+}
+
+.codigo-input:focus {
+  border-color: #6a9a52;
+  box-shadow: 0 0 0 3px rgba(106, 154, 82, 0.2);
+}
+
+.codigo-input:disabled {
+  opacity: 0.5;
+}
+
+/* Reenvío */
+.reenvio-wrap {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.3rem;
+  margin: 0.8rem 0;
+  font-size: 0.82rem;
+}
+
+.reenvio-texto {
+  color: #888;
+}
+
+.reenvio-cooldown {
+  color: #666;
+  font-size: 0.82rem;
+}
+
+.reenvio-btn {
+  background: none;
+  border: none;
+  color: #6a9a52;
+  font-size: 0.82rem;
+  cursor: pointer;
+  padding: 0;
+  text-decoration: underline;
+  font-family: inherit;
+  transition: opacity 0.15s;
+}
+
+.reenvio-btn:hover { opacity: 0.7; }
+.reenvio-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+/* Mensaje de éxito */
+.texto-exito {
+  color: #6a9a52;
+  font-size: 0.82rem;
+  text-align: center;
+  margin-bottom: 0.8rem;
+  background: rgba(106, 154, 82, 0.1);
+  border: 1px solid rgba(106, 154, 82, 0.3);
+  border-radius: 8px;
+  padding: 0.5rem 0.8rem;
+}

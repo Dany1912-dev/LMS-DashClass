@@ -3,6 +3,7 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import Layout from "../components/Layout";
 import { API } from "../api";
+import { BookMarked, GraduationCap, School, BookOpen, ArrowRight } from "lucide-react";
 import banner1 from "../assets/banners/banner_1.jpg";
 import banner2 from "../assets/banners/banner_2.jpg";
 import banner3 from "../assets/banners/banner_3.jpg";
@@ -79,21 +80,21 @@ export default function Dashboard() {
         {/* Stats */}
         <div className="panel-stats">
           <div className="stat-card">
-            <div className="stat-icon"></div>
+            <div className="stat-icon"><BookMarked size={22} strokeWidth={1.5} /></div>
             <div className="stat-info">
               <p className="stat-label">Cursos Activos</p>
               <p className="stat-value">{cursos.length}</p>
             </div>
           </div>
           <div className="stat-card">
-            <div className="stat-icon"></div>
+            <div className="stat-icon"><GraduationCap size={22} strokeWidth={1.5} /></div>
             <div className="stat-info">
               <p className="stat-label">Como Alumno</p>
               <p className="stat-value">{cursosAlumno.length}</p>
             </div>
           </div>
           <div className="stat-card">
-            <div className="stat-icon"></div>
+            <div className="stat-icon"><School size={22} strokeWidth={1.5} /></div>
             <div className="stat-info">
               <p className="stat-label">Como Maestro</p>
               <p className="stat-value">{cursosMaestro.length}</p>
@@ -106,7 +107,7 @@ export default function Dashboard() {
           <div className="panel-seccion-header">
             <h2 className="panel-seccion-titulo">Cursos Inscritos</h2>
             <button className="panel-ver-todo" onClick={() => navigate("/cursos")}>
-              Ver todo →
+              Ver todo <ArrowRight size={14} strokeWidth={1.5} />
             </button>
           </div>
 
@@ -125,7 +126,7 @@ export default function Dashboard() {
                   <div className="panel-curso-thumb">
                     {getBanner(curso.imagenBanner)
                       ? <img src={getBanner(curso.imagenBanner)!} alt="banner" />
-                      : <span></span>}
+                      : <span><BookOpen size={20} strokeWidth={1.5} /></span>}
                   </div>
                   <div className="panel-curso-info">
                     <p className="panel-curso-nombre">{curso.nombre}</p>

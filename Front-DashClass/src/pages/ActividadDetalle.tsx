@@ -3,6 +3,7 @@ import { useState, useEffect, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import Layout from "../components/Layout";
 import { API } from "../api";
+import { Pencil, Paperclip, Upload, CheckCircle, X, Calendar, Tag, Clock, Zap, FileText, Eye, Archive, ChevronLeft, Award } from "lucide-react";
 
 interface Actividad {
   idActividad: number;
@@ -321,9 +322,9 @@ export default function ActividadDetalle() {
 
         {/* Breadcrumb */}
         <div className="detalle-breadcrumb">
-          <button className="breadcrumb-btn" onClick={() => navigate(`/cursos/${idCurso}`)}>Curso</button>
+          <button className="breadcrumb-btn" onClick={() => navigate(`/cursos/${idCurso}`)}><ChevronLeft size={14} strokeWidth={1.5} /> Curso</button>
           <span className="breadcrumb-sep">/</span>
-          <button className="breadcrumb-btn" onClick={() => navigate(`/cursos/${idCurso}/grupos/${idGrupo}`)}>Grupo</button>
+          <button className="breadcrumb-btn" onClick={() => navigate(`/cursos/${idCurso}/grupos/${idGrupo}`)}><ChevronLeft size={14} strokeWidth={1.5} /> Grupo</button>
           <span className="breadcrumb-sep">/</span>
           <span className="breadcrumb-actual">{actividad.titulo}</span>
         </div>
@@ -376,7 +377,7 @@ export default function ActividadDetalle() {
                             {e.recursos.map((r: any) => (
                               <a key={r.idRecurso} href={`${BASE}${r.urlArchivo}`}
                                 target="_blank" rel="noreferrer" className="recurso-link-mini">
-                                 {r.nombre}
+                                <FileText size={12} strokeWidth={1.5} /> {r.nombre}
                               </a>
                             ))}
                           </div>
@@ -438,7 +439,7 @@ export default function ActividadDetalle() {
                     {esMaestro && (
                       <div className="detalle-acciones-maestro">
                         <button className="btn-editar-actividad" onClick={() => setEditando(true)}>
-                           Editar actividad
+                          <Pencil size={14} strokeWidth={1.5} /> Editar actividad
                         </button>
                       </div>
                     )}
@@ -452,7 +453,9 @@ export default function ActividadDetalle() {
                           <div className="entrega-actual">
                             <div className="entrega-actual-header">
                               <span className="entrega-actual-badge">
-                                {entregaActual.estado === "Calificada" ? " Calificada" : " Entregada"}
+                                {entregaActual.estado === "Calificada"
+                                  ? <><Award size={13} strokeWidth={1.5} /> Calificada</>
+                                  : <><CheckCircle size={13} strokeWidth={1.5} /> Entregada</>}
                               </span>
                               {entregaActual.esTardia && <span className="entrega-tardia-badge">Tardía</span>}
                               <span className="entrega-actual-fecha">
@@ -474,7 +477,7 @@ export default function ActividadDetalle() {
                                 {entregaActual.recursos.map((r: any) => (
                                   <a key={r.idRecurso} href={`${BASE}${r.urlArchivo}`}
                                     target="_blank" rel="noreferrer" className="recurso-link">
-                                     {r.nombre}
+                                    <FileText size={13} strokeWidth={1.5} /> {r.nombre}
                                   </a>
                                 ))}
                               </div>
@@ -511,7 +514,7 @@ export default function ActividadDetalle() {
                                   <div key={i} className="archivo-item">
                                     <span className="archivo-nombre"> {f.name}</span>
                                     <span className="archivo-size">{(f.size / 1024).toFixed(0)} KB</span>
-                                    <button className="archivo-quitar" onClick={() => handleQuitarArchivo(i)}></button>
+                                    <button className="archivo-quitar" onClick={() => handleQuitarArchivo(i)}><X size={13} strokeWidth={2} /></button>
                                   </div>
                                 ))}
                               </div>
@@ -519,7 +522,7 @@ export default function ActividadDetalle() {
                             <input ref={fileInputRef} type="file" multiple style={{ display: "none" }} onChange={handleAgregarArchivos} />
                             <div className="entrega-botones">
                               <button className="btn-agregar-archivos" onClick={() => fileInputRef.current?.click()}>
-                                 Agregar archivos
+                                <Paperclip size={14} strokeWidth={1.5} /> Agregar archivos
                               </button>
                               <button
                                 className="btn-entregar-archivos"
@@ -527,7 +530,7 @@ export default function ActividadDetalle() {
                                 disabled={loadingEntrega || archivos.length === 0}
                                 style={{ opacity: (loadingEntrega || archivos.length === 0) ? 0.6 : 1 }}
                               >
-                                {loadingEntrega ? "Subiendo..." : " Entregar"}
+                                {loadingEntrega ? "Subiendo..." : <><Upload size={14} strokeWidth={1.5} /> Entregar</>}
                               </button>
                               <button
                                 className="btn-marcar-entregada"
@@ -535,7 +538,7 @@ export default function ActividadDetalle() {
                                 disabled={loadingEntrega}
                                 style={{ opacity: loadingEntrega ? 0.6 : 1 }}
                               >
-                                 Marcar como entregada
+                                <CheckCircle size={14} strokeWidth={1.5} /> Marcar como entregada
                               </button>
                             </div>
                           </>
@@ -602,7 +605,7 @@ export default function ActividadDetalle() {
                           <button key={op} type="button"
                             className={`modal-estatus-btn ${formEdit.estatus === op ? "activo" : ""}`}
                             onClick={() => setFormEdit({ ...formEdit, estatus: op })}>
-                            {op === "Borrador" ? " Borrador" : op === "Publicado" ? " Publicado" : " Archivado"}
+                            {op === "Borrador" ? "Borrador" : op === "Publicado" ? <><Eye size={13} strokeWidth={1.5} /> Publicado</> : <><Archive size={13} strokeWidth={1.5} /> Archivado</>}
                           </button>
                         ))}
                       </div>
@@ -630,25 +633,25 @@ export default function ActividadDetalle() {
               </div>
               {actividad.puntosGamificacionMaximos > 0 && (
                 <div className="detalle-info-fila">
-                  <span className="detalle-info-label">Gamificación</span>
-                  <span className="detalle-info-valor"> {actividad.puntosGamificacionMaximos}</span>
+                  <span className="detalle-info-label"><Zap size={13} strokeWidth={1.5} /> Gamificación</span>
+                  <span className="detalle-info-valor">{actividad.puntosGamificacionMaximos}</span>
                 </div>
               )}
               <div className="detalle-info-fila">
-                <span className="detalle-info-label">Fecha límite</span>
+                <span className="detalle-info-label"><Calendar size={13} strokeWidth={1.5} /> Fecha límite</span>
                 <span className={`detalle-info-valor ${estaVencida ? "detalle-vencida" : ""}`}>
                   {actividad.fechaLimite ? formatFecha(actividad.fechaLimite) : "Sin límite"}
                 </span>
               </div>
               {actividad.nombreCategoria && (
                 <div className="detalle-info-fila">
-                  <span className="detalle-info-label">Categoría</span>
+                  <span className="detalle-info-label"><Tag size={13} strokeWidth={1.5} /> Categoría</span>
                   <span className="detalle-info-valor">{actividad.nombreCategoria} ({actividad.pesoCategoria}%)</span>
                 </div>
               )}
               <div className="detalle-info-fila">
-                <span className="detalle-info-label">Entregas tardías</span>
-                <span className="detalle-info-valor">{actividad.permiteEntregasTardias ? " Sí" : " No"}</span>
+                <span className="detalle-info-label"><Clock size={13} strokeWidth={1.5} /> Tardías</span>
+                <span className="detalle-info-valor">{actividad.permiteEntregasTardias ? "Permitidas" : "No permitidas"}</span>
               </div>
               {esMaestro && (
                 <div className="detalle-info-fila">
@@ -678,7 +681,7 @@ export default function ActividadDetalle() {
                 {entregaSeleccionada.recursos.map((r: any) => (
                   <a key={r.idRecurso} href={`${BASE}${r.urlArchivo}`}
                     target="_blank" rel="noreferrer" className="recurso-link">
-                     {r.nombre}
+                    <FileText size={13} strokeWidth={1.5} /> {r.nombre}
                   </a>
                 ))}
               </div>

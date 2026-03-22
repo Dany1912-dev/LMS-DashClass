@@ -27,9 +27,9 @@
   flex-direction: column;
   position: fixed;
   left: 0; top: 0; bottom: 0;
-  z-index: 50;
+  z-index: 100;
   transition: width var(--transition);
-  overflow: hidden;
+  overflow: visible;
 }
 
 .layout-container.sidebar-collapsed .layout-sidebar {
@@ -122,16 +122,16 @@
 .sidebar-nav-item:hover { background: var(--bg-hover); color: var(--text-primary); }
 .sidebar-nav-item.active { background: var(--accent-subtle); color: var(--text-accent); border-color: var(--border); }
 
-.sidebar-nav-icon {
-  font-size: 1rem;
-  flex-shrink: 0;
-  width: 20px;
-  text-align: center;
+.layout-container.sidebar-collapsed .sidebar-nav-item span:not(.sidebar-nav-icon) {
+  opacity: 0;
+  width: 0;
+  overflow: hidden;
 }
 
-.layout-container.sidebar-collapsed .sidebar-nav-item {
-  justify-content: center;
-  padding: 0.6rem;
+.layout-container.sidebar-collapsed .sidebar-brand-name {
+  opacity: 0;
+  width: 0;
+  overflow: hidden;
 }
 
 /* Bottom user */
@@ -140,6 +140,7 @@
   border-top: 1px solid var(--border);
   flex-shrink: 0;
   position: relative;
+  overflow: visible;
 }
 
 .sidebar-user {
@@ -210,6 +211,25 @@
   z-index: 100;
   overflow: hidden;
   animation: fadeUp 0.15s ease;
+  min-width: 180px;
+}
+
+/* Cuando está colapsado, abrir hacia la derecha del sidebar */
+.layout-container.sidebar-collapsed .perfil-menu {
+  left: calc(var(--sidebar-collapsed-width) + 4px);
+  right: auto;
+  bottom: 0.5rem;
+  width: 200px;
+  z-index: 300;
+}
+
+/* Iconos en nav items — centrado correcto */
+.sidebar-nav-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 20px;
 }
 
 @keyframes fadeUp {
@@ -404,3 +424,17 @@
 
 .modal-btn-confirmar:hover { background: var(--accent-dim); box-shadow: 0 4px 12px rgba(106,154,82,0.3); }
 .modal-btn-confirmar:disabled { opacity: 0.6; cursor: not-allowed; }
+/* ── Iconos en menu de perfil ── */
+.perfil-menu-item {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.perfil-menu-item svg { flex-shrink: 0; opacity: 0.7; }
+.perfil-menu-logout svg { opacity: 0.9; }
+
+.layout-container.sidebar-collapsed .sidebar-nav-item {
+  justify-content: center;
+  padding: 0.6rem;
+}

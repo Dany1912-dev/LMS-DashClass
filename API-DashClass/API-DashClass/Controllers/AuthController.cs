@@ -64,6 +64,22 @@ namespace API_DashClass.Controllers
         }
 
         /// <summary>
+        /// Solicita el envío de un código 2FA al correo (usado cuando Enable2FA está desactivado en backend)
+        /// </summary>
+        [HttpPost("solicitar-2fa")]
+        public async Task<IActionResult> Solicitar2FA([FromBody] Solicitar2FARequest request)
+        {
+            try
+            {
+                if (!ModelState.IsValid) return BadRequest(ModelState);
+                await _authService.Solicitar2FAAsync(request.Email);
+                return Ok(new { message = "Codigo enviado al correo" });
+            }
+            catch (InvalidOperationException ex) { return BadRequest(new { message = ex.Message }); }
+            catch (Exception ex) { return StatusCode(500, new { message = "Error al enviar codigo", error = ex.Message }); }
+        }
+
+        /// <summary>
         /// Verifica el código 2FA y devuelve JWT
         /// </summary>
         [HttpPost("verificar-2fa")]
@@ -126,7 +142,7 @@ namespace API_DashClass.Controllers
             catch (InvalidOperationException ex) { return Unauthorized(new { message = ex.Message }); }
             catch (Exception ex) { return StatusCode(500, new { message = "Error al renovar token", error = ex.Message }); }
         }
-        
+
         [HttpPost("logout")]
         public async Task<IActionResult> Logout([FromBody] string refreshToken)
         {

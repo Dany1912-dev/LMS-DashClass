@@ -18,9 +18,9 @@
   --accent-glow:   rgba(106, 154, 82, 0.15);
   --accent-subtle: rgba(106, 154, 82, 0.08);
 
-  --text-primary:  #e8ede8;
-  --text-secondary:#8fa88a;
-  --text-muted:    #526050;
+  --text-primary:  #f0f5f0;
+  --text-secondary:#b8d0b2;
+  --text-muted:    #7a9975;
   --text-accent:   #8fc272;
 
   --border:        rgba(106, 154, 82, 0.12);
