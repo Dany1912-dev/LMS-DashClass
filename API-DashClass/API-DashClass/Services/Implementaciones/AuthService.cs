@@ -36,6 +36,19 @@ namespace API_DashClass.Services.Implementaciones
         // ========================================
         // REGISTER
         // ========================================
+        public async Task Solicitar2FAAsync(string email)
+        {
+            var usuario = await _context.Usuarios
+                .FirstOrDefaultAsync(u => u.Email == email)
+                ?? throw new InvalidOperationException("Usuario no encontrado");
+
+            if (!usuario.Estatus)
+                throw new InvalidOperationException("La cuenta está desactivada");
+
+            var codigo = GenerarCodigo6Digitos();
+            _cache.Set($"2fa_{email}", codigo, TimeSpan.FromMinutes(15));
+            await _emailService.EnviarCodigo2FAAsync(email, usuario.Nombre, codigo);
+        }
 
         public async Task<AuthResponse> RegisterAsync(AuthRegisterRequest request)
         {

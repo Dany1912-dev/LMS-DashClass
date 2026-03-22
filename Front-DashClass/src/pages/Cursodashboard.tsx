@@ -3,6 +3,7 @@ import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import Layout from "../components/Layout";
 import { API } from "../api";
+import { Users, Users2, GraduationCap, Pencil, Plus, Tag, Copy, Check, ArrowRight } from "lucide-react";
 import banner1 from "../assets/banners/banner_1.jpg";
 import banner2 from "../assets/banners/banner_2.jpg";
 import banner3 from "../assets/banners/banner_3.jpg";
@@ -382,10 +383,10 @@ export default function CursoDashboard() {
             </div>
             {esMaestro && (
               <div className="curso-hero-acciones">
-                <button className="btn-hero-secundario" onClick={abrirEditar}> Editar</button>
-                <button className="btn-hero-secundario" onClick={() => setModalGrupo(true)}>+ Grupo</button>
-                <button className="btn-hero-secundario" onClick={() => setModalCategorias(true)}> Categorías</button>
-                <button className="btn-hero-principal" onClick={() => setModalActividad(true)}>+ Actividad</button>
+                <button className="btn-hero-secundario" onClick={abrirEditar}><Pencil size={14} strokeWidth={1.5} /> Editar</button>
+                <button className="btn-hero-secundario" onClick={() => setModalGrupo(true)}><Plus size={14} strokeWidth={1.5} /> Grupo</button>
+                <button className="btn-hero-secundario" onClick={() => setModalCategorias(true)}><Tag size={14} strokeWidth={1.5} /> Categorías</button>
+                <button className="btn-hero-principal" onClick={() => setModalActividad(true)}><Plus size={14} strokeWidth={1.5} /> Actividad</button>
               </div>
             )}
           </div>
@@ -394,21 +395,21 @@ export default function CursoDashboard() {
         {/* Stats */}
         <div className="curso-stats">
           <div className="stat-card">
-            <div className="stat-icon"></div>
+            <div className="stat-icon"><Users size={22} strokeWidth={1.5} /></div>
             <div className="stat-info">
               <p className="stat-label">Estudiantes</p>
               <p className="stat-value">{estudiantes.length}</p>
             </div>
           </div>
           <div className="stat-card">
-            <div className="stat-icon"></div>
+            <div className="stat-icon"><Users2 size={22} strokeWidth={1.5} /></div>
             <div className="stat-info">
               <p className="stat-label">Grupos</p>
               <p className="stat-value">{curso.grupos.length}</p>
             </div>
           </div>
           <div className="stat-card">
-            <div className="stat-icon"></div>
+            <div className="stat-icon"><GraduationCap size={22} strokeWidth={1.5} /></div>
             <div className="stat-info">
               <p className="stat-label">Profesores</p>
               <p className="stat-value">{profesores.length}</p>
@@ -420,10 +421,10 @@ export default function CursoDashboard() {
         <div className="curso-tabs-wrap">
           <div className="curso-tabs">
             <button className={`curso-tab ${tab === "grupos" ? "active" : ""}`} onClick={() => setTab("grupos")}>
-              Grupos
+              <Users2 size={14} strokeWidth={1.5} /> Grupos
             </button>
             <button className={`curso-tab ${tab === "miembros" ? "active" : ""}`} onClick={() => setTab("miembros")}>
-              Miembros ({miembros.length})
+              <Users size={14} strokeWidth={1.5} /> Miembros ({miembros.length})
             </button>
           </div>
         </div>
@@ -446,7 +447,7 @@ export default function CursoDashboard() {
                         className={`codigo-copiar ${copiado === grupo.idGrupo ? "copiado" : ""}`}
                         onClick={() => handleCopiar(grupo.invitacion.codigo, grupo.idGrupo)}
                       >
-                        {copiado === grupo.idGrupo ? " Copiado" : "Copiar"}
+                        {copiado === grupo.idGrupo ? <><Check size={13} strokeWidth={2} /> Copiado</> : <><Copy size={13} strokeWidth={1.5} /> Copiar</>}
                       </button>
                     </div>
                   </div>
@@ -459,7 +460,7 @@ export default function CursoDashboard() {
                     className="grupo-card-entrar"
                     onClick={() => navigate(`/cursos/${idCurso}/grupos/${grupo.idGrupo}`)}
                   >
-                    Entrar →
+                    Entrar <ArrowRight size={14} strokeWidth={1.5} />
                   </button>
                 </div>
               </div>

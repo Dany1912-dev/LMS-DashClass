@@ -3,6 +3,7 @@ import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import Layout from "../components/Layout";
 import { API } from "../api";
+import { Users, ClipboardList, Trophy, Tag, Calendar, Copy, Check, Plus, Zap, Eye, Archive, RotateCcw, Trash2, ChevronLeft } from "lucide-react";
 
 interface Miembro {
   idMiembroCurso: number;
@@ -314,7 +315,7 @@ export default function GrupoDashboard() {
         {/* Breadcrumb */}
         <div className="grupo-breadcrumb">
           <button className="breadcrumb-btn" onClick={() => navigate(`/cursos/${idCurso}`)}>
-            ← {curso.nombre}
+            <ChevronLeft size={14} strokeWidth={1.5} /> {curso.nombre}
           </button>
           <span className="breadcrumb-sep">/</span>
           <span className="breadcrumb-actual">{grupo.nombre}</span>
@@ -326,8 +327,8 @@ export default function GrupoDashboard() {
             <h1 className="grupo-titulo">{grupo.nombre}</h1>
             {grupo.descripcion && <p className="grupo-desc">{grupo.descripcion}</p>}
             <div className="grupo-header-meta">
-              <span className="grupo-meta-item"> {estudiantes.length} estudiantes</span>
-              <span className="grupo-meta-item"> {actividades.length} actividades</span>
+              <span className="grupo-meta-item"><Users size={13} strokeWidth={1.5} /> {estudiantes.length} estudiantes</span>
+              <span className="grupo-meta-item"><ClipboardList size={13} strokeWidth={1.5} /> {actividades.length} actividades</span>
             </div>
           </div>
 
@@ -342,7 +343,7 @@ export default function GrupoDashboard() {
                     className={`grupo-codigo-copiar ${copiado ? "copiado" : ""}`}
                     onClick={handleCopiar}
                   >
-                    {copiado ? "" : "Copiar"}
+                    {copiado ? <><Check size={13} strokeWidth={2} /> Copiado</> : <><Copy size={13} strokeWidth={1.5} /> Copiar</>}
                   </button>
                 </div>
               </div>
@@ -362,20 +363,20 @@ export default function GrupoDashboard() {
               className={`grupo-tab ${tab === "actividades" ? "active" : ""}`}
               onClick={() => setTab("actividades")}
             >
-              Actividades ({actividades.length})
+              <ClipboardList size={14} strokeWidth={1.5} /> Actividades ({actividades.length})
             </button>
             <button
               className={`grupo-tab ${tab === "miembros" ? "active" : ""}`}
               onClick={() => setTab("miembros")}
             >
-              Miembros ({estudiantes.length})
+              <Users size={14} strokeWidth={1.5} /> Miembros ({estudiantes.length})
             </button>
             {!esMaestro && (
               <button
                 className={`grupo-tab ${tab === "puntos" ? "active" : ""}`}
                 onClick={() => setTab("puntos")}
               >
-                 Mis Puntos
+                <Trophy size={14} strokeWidth={1.5} /> Mis Puntos
               </button>
             )}
           </div>
@@ -419,12 +420,12 @@ export default function GrupoDashboard() {
                       <div className="actividad-card-meta">
                         {a.nombreCategoria && (
                           <span className="actividad-meta-cat">
-                             {a.nombreCategoria} ({a.pesoCategoria}%)
+                            <Tag size={12} strokeWidth={1.5} /> {a.nombreCategoria} ({a.pesoCategoria}%)
                           </span>
                         )}
                         {a.fechaLimite && (
                           <span className="actividad-meta-fecha">
-                             {formatFecha(a.fechaLimite)}
+                            <Calendar size={12} strokeWidth={1.5} /> {formatFecha(a.fechaLimite)}
                           </span>
                         )}
                         {a.permiteEntregasTardias && (
@@ -439,7 +440,7 @@ export default function GrupoDashboard() {
                       </div>
                       {a.puntosGamificacionMaximos > 0 && (
                         <div className="actividad-puntos-gam">
-                          <span> {a.puntosGamificacionMaximos}</span>
+                          <span><Zap size={12} strokeWidth={1.5} /> {a.puntosGamificacionMaximos}</span>
                         </div>
                       )}
                       {/* Menú 3 puntos — solo maestro */}
@@ -455,24 +456,24 @@ export default function GrupoDashboard() {
                             <div className="actividad-menu-dropdown">
                               {a.estatus === "Borrador" && (
                                 <button className="actividad-menu-item" onClick={() => handleCambiarEstatus(a.idActividad, "Publicado")}>
-                                   Publicar
+                                  <Eye size={13} strokeWidth={1.5} /> Publicar
                                 </button>
                               )}
                               {a.estatus === "Publicado" && (
                                 <button className="actividad-menu-item" onClick={() => handleCambiarEstatus(a.idActividad, "Archivado")}>
-                                   Archivar
+                                  <Archive size={13} strokeWidth={1.5} /> Archivar
                                 </button>
                               )}
                               {a.estatus === "Archivado" && (
                                 <button className="actividad-menu-item" onClick={() => handleCambiarEstatus(a.idActividad, "Publicado")}>
-                                   Restaurar
+                                  <RotateCcw size={13} strokeWidth={1.5} /> Restaurar
                                 </button>
                               )}
                               <button
                                 className="actividad-menu-item actividad-menu-item-danger"
                                 onClick={() => handleEliminar(a.idActividad)}
                               >
-                                 Eliminar
+                                <Trash2 size={13} strokeWidth={1.5} /> Eliminar
                               </button>
                             </div>
                           )}
